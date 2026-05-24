@@ -1,0 +1,74 @@
+# Decap CMS — panel admin para Espazios
+# Acceso: https://www.espazios.com.co/admin
+# Documentación: https://decapcms.org/docs/
+
+backend:
+  name: github
+  repo: espazios/espazios-web
+  branch: main
+  base_url: https://api.netlify.com  # OAuth gateway (requiere conexión a Netlify gratuita)
+
+media_folder: "public/uploads"
+public_folder: "/uploads"
+
+locale: "es"
+
+publish_mode: editorial_workflow  # workflow con borrador → revisión → publicado
+
+collections:
+  - name: "proyectos"
+    label: "🏗️ Proyectos"
+    label_singular: "Proyecto"
+    folder: "src/content/proyectos"
+    create: true
+    slug: "{{slug}}"
+    summary: "{{title}} · {{ciudad}} · {{duracionSemanas}} semanas"
+    sortable_fields: ["fechaEntrega", "title", "ciudad"]
+    fields:
+      - { name: "title", label: "Título del proyecto", widget: "string", hint: "Ej: Cocina integral con isla — Cedritos" }
+      - { name: "tipoProyecto", label: "Tipo de proyecto", widget: "select", options: ["Remodelación completa", "Carpintería", "Solo acabados"] }
+      - { name: "subtipo", label: "Subtipo", widget: "select", required: false, options: ["Cocina", "Baño", "Apartamento", "Closet", "Sala", "Oficina", "Local"] }
+      - { name: "ciudad", label: "Ciudad", widget: "string" }
+      - { name: "barrio", label: "Barrio o conjunto", widget: "string", required: false }
+      - { name: "descripcionCorta", label: "Descripción corta (1 línea para card)", widget: "string" }
+      - { name: "fotoPortada", label: "Foto portada", widget: "image", required: false, hint: "Ideal 1200×800px, comprimida (<300KB)" }
+      - { name: "fotoAntes", label: "Foto antes", widget: "image", required: false }
+      - { name: "fotoDespues", label: "Foto después", widget: "image", required: false }
+      - { name: "galeria", label: "Galería adicional", widget: "list", required: false, field: { name: "imagen", label: "Imagen", widget: "image" } }
+      - { name: "duracionSemanas", label: "Duración (semanas)", widget: "number", required: false }
+      - { name: "rangoPresupuesto", label: "Rango presupuesto", widget: "string", required: false, hint: "Ej: $30M-$45M" }
+      - { name: "destacado", label: "Destacar en home", widget: "boolean", default: false }
+      - { name: "fechaEntrega", label: "Fecha de entrega", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false }
+      - { name: "testimonioCliente", label: "Testimonio del cliente", widget: "text", required: false }
+      - { name: "nombreCliente", label: "Nombre del cliente", widget: "string", required: false, hint: "Puede ser anónimo: 'Familia García'" }
+      - { name: "etiquetas", label: "Etiquetas", widget: "list", required: false, default: [] }
+      - { name: "tieneVideo", label: "¿Tiene video?", widget: "boolean", default: false }
+      - { name: "videoUrl", label: "URL del video", widget: "string", required: false, hint: "TikTok, Instagram o YouTube" }
+      - { name: "videoPlataforma", label: "Plataforma del video", widget: "select", required: false, options: ["TikTok", "Instagram", "YouTube"] }
+      - { name: "seoTitle", label: "SEO Title (60 chars máx)", widget: "string", required: false }
+      - { name: "seoDescription", label: "SEO Description (160 chars máx)", widget: "text", required: false }
+      - { name: "draft", label: "Borrador (no publicar)", widget: "boolean", default: false }
+      - { name: "body", label: "Descripción larga", widget: "markdown" }
+
+  - name: "blog"
+    label: "📝 Blog"
+    label_singular: "Artículo"
+    folder: "src/content/blog"
+    create: true
+    slug: "{{slug}}"
+    summary: "{{title}} · {{categoria}} · {{fechaPublicacion}}"
+    sortable_fields: ["fechaPublicacion", "title", "categoria"]
+    fields:
+      - { name: "title", label: "Título del artículo", widget: "string" }
+      - { name: "excerpt", label: "Resumen (140-160 chars)", widget: "text" }
+      - { name: "categoria", label: "Categoría", widget: "select", options: ["Remodelación", "Carpintería", "Acabados", "Guías y Consejos"] }
+      - { name: "tags", label: "Tags (keywords SEO)", widget: "list", required: false, default: [] }
+      - { name: "autor", label: "Autor", widget: "string", default: "Equipo Espazios" }
+      - { name: "fechaPublicacion", label: "Fecha de publicación", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false }
+      - { name: "fechaActualizacion", label: "Fecha de actualización", widget: "datetime", required: false, date_format: "YYYY-MM-DD", time_format: false }
+      - { name: "imagenDestacada", label: "Imagen destacada", widget: "image", required: false }
+      - { name: "minutosLectura", label: "Minutos de lectura", widget: "number", required: false }
+      - { name: "seoTitle", label: "SEO Title", widget: "string", required: false }
+      - { name: "seoDescription", label: "SEO Description", widget: "text", required: false }
+      - { name: "draft", label: "Borrador", widget: "boolean", default: false }
+      - { name: "body", label: "Contenido del artículo", widget: "markdown" }

@@ -1,0 +1,87 @@
+---
+---
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="reveal">
+        <span class="hero-eyebrow">⭐ + 80 proyectos entregados en Bogotá</span>
+        <h1>Transformamos apartamentos en <em>espacios listos para vivir.</em></h1>
+        <p class="lead">
+          Acabados, carpintería y remodelación integral en Bogotá y alrededores. Diseño profesional,
+          materiales de alta calidad y un equipo que te acompaña en cada paso.
+        </p>
+        <div class="hero-ctas">
+          <a href="/cotiza" class="btn btn-primary btn-large">Cotiza tu proyecto →</a>
+          <a href="/proyectos" class="btn btn-secondary btn-large">Ver proyectos</a>
+        </div>
+        <div class="hero-trust">
+          <div class="hero-trust-item"><div class="num">7</div><div class="lbl">Años de experiencia</div></div>
+          <div class="hero-trust-item"><div class="num">80+</div><div class="lbl">Hogares transformados</div></div>
+          <div class="hero-trust-item"><div class="num">98%</div><div class="lbl">Clientes recomiendan</div></div>
+        </div>
+      </div>
+      <div class="hero-photo reveal">
+        <div class="ph-text">
+          <strong>📸 Foto del equipo</strong>
+          Aquí va una foto premium del equipo trabajando con un cliente o de una entrega final feliz.
+        </div>
+        <div class="hero-photo-tag">
+          <div class="avatar">CR</div>
+          <div>
+            <div class="name">Camila Rodríguez · Cliente</div>
+            <div class="role">Cocina integral en Cedritos · 6 semanas</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    padding: var(--space-12) 0 var(--space-16);
+    background: linear-gradient(180deg, var(--c-bg) 0%, rgba(170, 191, 173, 0.12) 100%);
+    overflow: hidden;
+  }
+  .hero-grid {
+    display: grid; grid-template-columns: 1fr;
+    gap: var(--space-12); align-items: center;
+  }
+  @media (min-width: 900px) {
+    .hero-grid { grid-template-columns: 1.05fr 1fr; gap: var(--space-12); }
+  }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: var(--space-2);
+    background: rgba(118, 166, 143, 0.12);
+    padding: 8px 16px; border-radius: var(--radius-pill);
+    font-size: 0.8rem; font-weight: 600; color: var(--c-verde-texto);
+    letter-spacing: 0.04em; margin-bottom: var(--space-6);
+  }
+  .hero h1 { font-size: var(--fs-hero); margin-bottom: var(--space-6); letter-spacing: -0.02em; }
+  .hero h1 em { font-style: italic; color: var(--c-verde-texto); font-weight: 400; }
+  .hero p.lead { font-size: 1.15rem; color: var(--c-text-body); max-width: 540px; margin-bottom: var(--space-8); }
+  .hero-ctas { display: flex; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-8); }
+  .hero-trust { display: flex; gap: var(--space-8); flex-wrap: wrap; padding-top: var(--space-6); border-top: 1px solid var(--c-border); }
+  .hero-trust-item .num { font-family: 'Fraunces', serif; font-size: 1.5rem; font-weight: 600; color: var(--c-azul-profundo); line-height: 1; }
+  .hero-trust-item .lbl { font-size: 0.82rem; color: var(--c-text-muted); margin-top: 4px; }
+  .hero-photo {
+    position: relative; border-radius: var(--radius-lg); overflow: hidden;
+    aspect-ratio: 4 / 5;
+    background: linear-gradient(135deg, var(--c-verde-neutro), var(--c-verde-salvia));
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: var(--shadow-strong);
+  }
+  .ph-text { text-align: center; color: rgba(255,255,255,0.9); font-family: 'Fraunces', serif; font-style: italic; padding: var(--space-8); max-width: 80%; }
+  .ph-text strong { display: block; font-size: 1.1rem; margin-bottom: var(--space-2); font-style: normal; }
+  .hero-photo-tag {
+    position: absolute; bottom: var(--space-6); left: var(--space-6); right: var(--space-6);
+    background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);
+    border-radius: var(--radius-md); padding: var(--space-4);
+    display: flex; align-items: center; gap: var(--space-3);
+    box-shadow: var(--shadow-medium);
+  }
+  .hero-photo-tag .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--c-azul-pizarra); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem; flex-shrink: 0; }
+  .hero-photo-tag .name { font-weight: 600; color: var(--c-text-strong); font-size: 0.9rem; }
+  .hero-photo-tag .role { font-size: 0.78rem; color: var(--c-text-muted); }
+</style>

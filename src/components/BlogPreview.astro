@@ -1,0 +1,50 @@
+---
+import { getCollection } from 'astro:content';
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.fechaPublicacion.getTime() - a.data.fechaPublicacion.getTime())
+  .slice(0, 3);
+const fmtDate = (d: Date) => d.toLocaleDateString('es-CO', { month: 'long', year: 'numeric' });
+---
+
+<section id="blog" style="background: linear-gradient(180deg, transparent 0%, rgba(170, 191, 173, 0.06) 100%);">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Blog Espazios</span>
+      <h2>Guías, precios y tendencias</h2>
+      <p>Compartimos lo que aprendemos en obra. Útil si estás planeando una remodelación.</p>
+    </div>
+    <div class="blog-grid">
+      {posts.map(p => (
+        <a href={`/blog/${p.slug}`} class="blog-card reveal">
+          <div class="blog-card-img">
+            <span class="blog-card-cat">{p.data.categoria}</span>
+          </div>
+          <div class="blog-card-body">
+            <h3>{p.data.title}</h3>
+            <div class="blog-card-meta">
+              <span>📅 {fmtDate(p.data.fechaPublicacion)}</span>
+              {p.data.minutosLectura && <span>· {p.data.minutosLectura} min de lectura</span>}
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+    <div class="blog-cta reveal">
+      <a href="/blog" class="btn btn-secondary btn-large">Ver todos los artículos →</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .blog-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-6); }
+  @media (min-width: 700px) { .blog-grid { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1000px) { .blog-grid { grid-template-columns: repeat(3, 1fr); } }
+  .blog-card { background: var(--c-bg-elev); border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--c-border); transition: transform var(--t-base), box-shadow var(--t-base); display: flex; flex-direction: column; text-decoration: none; color: inherit; }
+  .blog-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-medium); border-color: transparent; }
+  .blog-card-img { height: 180px; background: linear-gradient(135deg, var(--c-verde-neutro), var(--c-verde-salvia)); position: relative; }
+  .blog-card-cat { position: absolute; top: var(--space-3); left: var(--space-3); background: rgba(255,255,255,0.95); color: var(--c-azul-profundo); padding: 4px 10px; border-radius: var(--radius-pill); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; }
+  .blog-card-body { padding: var(--space-6); flex: 1; display: flex; flex-direction: column; }
+  .blog-card h3 { font-size: 1.15rem; margin-bottom: var(--space-3); flex: 1; color: var(--c-text-strong); }
+  .blog-card-meta { font-size: 0.8rem; color: var(--c-text-muted); display: flex; gap: var(--space-3); margin-top: var(--space-3); }
+  .blog-cta { text-align: center; margin-top: var(--space-12); }
+</style>

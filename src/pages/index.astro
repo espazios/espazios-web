@@ -1,0 +1,40 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import ProductosGrid from '../components/ProductosGrid.astro';
+import ProyectosPreview from '../components/ProyectosPreview.astro';
+import Cotizador from '../components/Cotizador.astro';
+import ComoFunciona from '../components/ComoFunciona.astro';
+import PorQue from '../components/PorQue.astro';
+import BlogPreview from '../components/BlogPreview.astro';
+---
+
+<Layout
+  title="Espazios — Acabados y Remodelación en Bogotá"
+  description="Empresa de acabados, carpintería y remodelación integral en Bogotá y Soacha. Diseño profesional, materiales premium, acompañamiento total. Cotiza online."
+  activeNav="home"
+>
+  <Hero />
+  <ProductosGrid />
+  <ProyectosPreview />
+  <Cotizador />
+  <ComoFunciona />
+  <PorQue />
+  <BlogPreview />
+
+  <section class="cta-final" id="contacto">
+    <div class="container">
+      <div class="reveal">
+        <h2>¿Listo para transformar tu espacio?</h2>
+        <p>Recibe tu cotización personalizada en menos de 24 horas hábiles.</p>
+        <a href="/cotiza" class="btn btn-primary btn-large" style="background: var(--c-verde-claro); color: var(--c-azul-profundo);">Cotiza tu proyecto →</a>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .cta-final { background: var(--c-azul-profundo); color: #fff; text-align: center; }
+  .cta-final h2 { color: #fff; font-size: var(--fs-h1); margin-bottom: var(--space-4); }
+  .cta-final p { color: rgba(255,255,255,0.7); font-size: 1.1rem; margin-bottom: var(--space-8); max-width: 540px; margin-left: auto; margin-right: auto; }
+</style>

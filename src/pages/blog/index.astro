@@ -1,0 +1,88 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.fechaPublicacion.getTime() - a.data.fechaPublicacion.getTime());
+const fmtDate = (d: Date) => d.toLocaleDateString('es-CO', { month: 'long', year: 'numeric' });
+---
+
+<Layout
+  title="Blog de remodelación y diseño — Espazios"
+  description="Guías, precios y tendencias de remodelación, carpintería y acabados en Bogotá y Colombia."
+  activeNav="blog"
+>
+  <section class="page-hero">
+    <div class="container">
+      <div class="breadcrumb"><a href="/">Inicio</a> &nbsp;›&nbsp; Blog</div>
+      <span class="eyebrow">Blog Espazios</span>
+      <h1>Guías, precios y tendencias</h1>
+      <p>Compartimos lo que aprendemos en obra. Útil si estás planeando una remodelación.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="filters reveal">
+        <button class="filter-pill active" data-cat="all">Todos ({posts.length})</button>
+        <button class="filter-pill" data-cat="Remodelación">Remodelación</button>
+        <button class="filter-pill" data-cat="Carpintería">Carpintería</button>
+        <button class="filter-pill" data-cat="Acabados">Acabados</button>
+        <button class="filter-pill" data-cat="Guías y Consejos">Guías y Consejos</button>
+      </div>
+      <div class="blog-grid">
+        {posts.map(p => (
+          <a href={`/blog/${p.slug}`} class="blog-card reveal" data-cat={p.data.categoria}>
+            <div class="blog-card-img">
+              <span class="blog-card-cat">{p.data.categoria}</span>
+            </div>
+            <div class="blog-card-body">
+              <h3>{p.data.title}</h3>
+              <p class="excerpt">{p.data.excerpt}</p>
+              <div class="blog-card-meta">
+                <span>📅 {fmtDate(p.data.fechaPublicacion)}</span>
+                {p.data.minutosLectura && <span>· {p.data.minutosLectura} min</span>}
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .page-hero { padding: var(--space-12) 0; background: linear-gradient(180deg, var(--c-bg) 0%, rgba(170, 191, 173, 0.12) 100%); text-align: center; }
+  .page-hero h1 { font-size: var(--fs-h1); margin-bottom: var(--space-4); max-width: 720px; margin-left: auto; margin-right: auto; }
+  .page-hero p { font-size: 1.1rem; color: var(--c-text-muted); max-width: 640px; margin: 0 auto; }
+  .breadcrumb { font-size: 0.85rem; color: var(--c-text-muted); margin-bottom: var(--space-4); }
+  .breadcrumb a { color: var(--c-verde-texto); text-decoration: none; }
+  .filters { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2); margin-bottom: var(--space-8); }
+  .filter-pill { background: transparent; color: var(--c-text-body); border: 1.5px solid var(--c-border); padding: 8px 18px; border-radius: var(--radius-pill); font-size: 0.88rem; font-weight: 500; cursor: pointer; transition: all var(--t-fast); font-family: inherit; }
+  .filter-pill:hover { border-color: var(--c-verde-texto); color: var(--c-verde-texto); }
+  .filter-pill.active { background: var(--c-verde-texto); color: #fff; border-color: var(--c-verde-texto); }
+  .blog-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-6); }
+  @media (min-width: 700px) { .blog-grid { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1000px) { .blog-grid { grid-template-columns: repeat(3, 1fr); } }
+  .blog-card { background: var(--c-bg-elev); border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--c-border); transition: transform var(--t-base), box-shadow var(--t-base); display: flex; flex-direction: column; text-decoration: none; color: inherit; }
+  .blog-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-medium); border-color: transparent; }
+  .blog-card-img { height: 200px; background: linear-gradient(135deg, var(--c-verde-neutro), var(--c-verde-salvia)); position: relative; }
+  .blog-card-cat { position: absolute; top: var(--space-3); left: var(--space-3); background: rgba(255,255,255,0.95); color: var(--c-azul-profundo); padding: 4px 10px; border-radius: var(--radius-pill); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; }
+  .blog-card-body { padding: var(--space-6); flex: 1; display: flex; flex-direction: column; }
+  .blog-card h3 { font-size: 1.15rem; margin-bottom: var(--space-3); color: var(--c-text-strong); }
+  .excerpt { color: var(--c-text-muted); font-size: 0.92rem; margin-bottom: var(--space-3); flex: 1; }
+  .blog-card-meta { font-size: 0.8rem; color: var(--c-text-muted); display: flex; gap: var(--space-3); margin-top: var(--space-3); }
+</style>
+
+<script>
+  const cards = document.querySelectorAll<HTMLAnchorElement>('.blog-card');
+  const pills = document.querySelectorAll<HTMLButtonElement>('.filter-pill');
+  pills.forEach(p => p.addEventListener('click', () => {
+    pills.forEach(x => x.classList.remove('active'));
+    p.classList.add('active');
+    const cat = p.dataset.cat;
+    cards.forEach(c => {
+      (c as HTMLElement).style.display = (cat === 'all' || c.dataset.cat === cat) ? '' : 'none';
+    });
+  }));
+</script>

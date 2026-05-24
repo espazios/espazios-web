@@ -1,0 +1,62 @@
+---
+import { getCollection } from 'astro:content';
+
+const proyectos = await getCollection('proyectos', ({ data }) => !data.draft);
+const destacados = proyectos
+  .sort((a, b) => {
+    if (a.data.destacado !== b.data.destacado) return a.data.destacado ? -1 : 1;
+    return b.data.fechaEntrega.getTime() - a.data.fechaEntrega.getTime();
+  })
+  .slice(0, 6);
+---
+
+<section id="proyectos" style="background: var(--c-bg);">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Proyectos entregados</span>
+      <h2>Espacios que cuentan historias</h2>
+      <p>Cada proyecto es un encargo único. Mira algunos de los apartamentos, cocinas y baños que hemos transformado.</p>
+    </div>
+
+    <div class="proyectos-grid">
+      {destacados.map((p) => (
+        <a href={`/proyectos/${p.slug}`} class="proyecto-card reveal">
+          <div class="proyecto-card-img"></div>
+          <div class="proyecto-card-overlay"></div>
+          {p.data.tieneVideo && (
+            <div class="video-badge">▶ {p.data.videoPlataforma}</div>
+          )}
+          <div class="proyecto-card-content">
+            <span class="proyecto-card-tipo">{p.data.tipoProyecto}</span>
+            <h3>{p.data.title}</h3>
+            <div class="proyecto-card-meta">
+              <span>📍 {p.data.ciudad}</span>
+              {p.data.duracionSemanas && <span>{p.data.duracionSemanas} semanas</span>}
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+
+    <div class="proyectos-cta reveal">
+      <a href="/proyectos" class="btn btn-secondary btn-large">Ver todos los proyectos →</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .proyectos-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-6); }
+  @media (min-width: 700px) { .proyectos-grid { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1000px) { .proyectos-grid { grid-template-columns: repeat(3, 1fr); } }
+  .proyecto-card { position: relative; border-radius: var(--radius-lg); overflow: hidden; cursor: pointer; aspect-ratio: 4 / 5; background: var(--c-azul-pizarra); transition: transform var(--t-base); display: block; text-decoration: none; color: inherit; }
+  .proyecto-card:hover { transform: translateY(-4px); }
+  .proyecto-card-img { position: absolute; inset: 0; background: linear-gradient(135deg, var(--c-azul-pizarra), var(--c-verde-salvia)); transition: transform var(--t-base); }
+  .proyecto-card:hover .proyecto-card-img { transform: scale(1.05); }
+  .proyecto-card-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(22, 56, 64, 0.85) 100%); }
+  .proyecto-card-content { position: absolute; bottom: 0; left: 0; right: 0; padding: var(--space-6); color: #fff; }
+  .proyecto-card-tipo { display: inline-block; background: rgba(255,255,255,0.18); backdrop-filter: blur(8px); padding: 4px 12px; border-radius: var(--radius-pill); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: var(--space-3); }
+  .proyecto-card h3 { color: #fff; font-size: 1.15rem; margin-bottom: var(--space-2); font-family: 'Fraunces', serif; font-weight: 500; }
+  .proyecto-card-meta { font-size: 0.82rem; color: rgba(255,255,255,0.75); display: flex; gap: var(--space-3); flex-wrap: wrap; }
+  .video-badge { position: absolute; top: var(--space-4); right: var(--space-4); background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); color: #fff; padding: 6px 10px; border-radius: var(--radius-pill); font-size: 0.72rem; font-weight: 600; display: flex; align-items: center; gap: 4px; z-index: 2; }
+  .proyectos-cta { text-align: center; margin-top: var(--space-12); }
+</style>

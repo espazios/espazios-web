@@ -1,0 +1,113 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const proyectos = (await getCollection('proyectos', ({ data }) => !data.draft))
+  .sort((a, b) => {
+    if (a.data.destacado !== b.data.destacado) return a.data.destacado ? -1 : 1;
+    return b.data.fechaEntrega.getTime() - a.data.fechaEntrega.getTime();
+  });
+---
+
+<Layout
+  title="Proyectos de remodelación en Bogotá — Espazios"
+  description="Proyectos de remodelación, carpintería y acabados entregados por Espazios en Bogotá, Soacha y alrededores. Galería antes y después con filtros."
+  activeNav="proyectos"
+>
+  <section class="page-hero">
+    <div class="container">
+      <div class="breadcrumb"><a href="/">Inicio</a> &nbsp;›&nbsp; Proyectos</div>
+      <span class="eyebrow">Portafolio</span>
+      <h1>Espacios que cuentan historias</h1>
+      <p>Cada proyecto es un encargo único. Mira los apartamentos, cocinas, baños y closets que hemos transformado en Bogotá, Soacha y alrededores.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="filters reveal">
+        <button class="filter-pill active" data-filter="todos">Todos ({proyectos.length})</button>
+        <button class="filter-pill" data-filter="Remodelación completa">Remodelación completa</button>
+        <button class="filter-pill" data-filter="Carpintería">Carpintería</button>
+        <button class="filter-pill" data-filter="Solo acabados">Solo acabados</button>
+        <button class="filter-pill" data-subtype="Cocina">Cocinas</button>
+        <button class="filter-pill" data-subtype="Baño">Baños</button>
+        <button class="filter-pill" data-subtype="Apartamento">Apartamentos</button>
+        <button class="filter-pill" data-subtype="Closet">Closets</button>
+      </div>
+
+      <div class="proyectos-grid" id="grid">
+        {proyectos.map(p => (
+          <a href={`/proyectos/${p.slug}`} class="proyecto-card reveal" data-tipo={p.data.tipoProyecto} data-subtipo={p.data.subtipo} data-ciudad={p.data.ciudad}>
+            <div class="proyecto-card-img"></div>
+            <div class="proyecto-card-overlay"></div>
+            {p.data.tieneVideo && <div class="video-badge">▶ {p.data.videoPlataforma}</div>}
+            <div class="proyecto-card-content">
+              <span class="proyecto-card-tipo">{p.data.tipoProyecto}</span>
+              <h3>{p.data.title}</h3>
+              <div class="proyecto-card-meta">
+                <span>📍 {p.data.ciudad}</span>
+                {p.data.duracionSemanas && <span>{p.data.duracionSemanas} semanas</span>}
+                {p.data.rangoPresupuesto && <span>{p.data.rangoPresupuesto}</span>}
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-final">
+    <div class="container">
+      <h2>¿Tu proyecto sería el #81?</h2>
+      <p>Cuéntanos qué tienes en mente. Te respondemos en menos de 24 horas hábiles.</p>
+      <a href="/cotiza" class="btn btn-primary btn-large" style="background: var(--c-verde-claro); color: var(--c-azul-profundo);">Cotiza tu proyecto →</a>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .page-hero { padding: var(--space-12) 0; background: linear-gradient(180deg, var(--c-bg) 0%, rgba(170, 191, 173, 0.12) 100%); text-align: center; }
+  .page-hero h1 { font-size: var(--fs-h1); margin-bottom: var(--space-4); max-width: 720px; margin-left: auto; margin-right: auto; }
+  .page-hero p { font-size: 1.1rem; color: var(--c-text-muted); max-width: 640px; margin: 0 auto; }
+  .breadcrumb { font-size: 0.85rem; color: var(--c-text-muted); margin-bottom: var(--space-4); }
+  .breadcrumb a { color: var(--c-verde-texto); text-decoration: none; }
+  .filters { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2); margin-bottom: var(--space-8); }
+  .filter-pill { background: transparent; color: var(--c-text-body); border: 1.5px solid var(--c-border); padding: 8px 18px; border-radius: var(--radius-pill); font-size: 0.88rem; font-weight: 500; cursor: pointer; transition: all var(--t-fast); font-family: inherit; }
+  .filter-pill:hover { border-color: var(--c-verde-texto); color: var(--c-verde-texto); }
+  .filter-pill.active { background: var(--c-verde-texto); color: #fff; border-color: var(--c-verde-texto); }
+
+  .proyectos-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-6); }
+  @media (min-width: 700px) { .proyectos-grid { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1000px) { .proyectos-grid { grid-template-columns: repeat(3, 1fr); } }
+  .proyecto-card { position: relative; border-radius: var(--radius-lg); overflow: hidden; cursor: pointer; aspect-ratio: 4 / 5; background: var(--c-azul-pizarra); transition: transform var(--t-base); display: block; text-decoration: none; color: inherit; }
+  .proyecto-card:hover { transform: translateY(-4px); }
+  .proyecto-card-img { position: absolute; inset: 0; background: linear-gradient(135deg, var(--c-azul-pizarra), var(--c-verde-salvia)); transition: transform var(--t-base); }
+  .proyecto-card:hover .proyecto-card-img { transform: scale(1.05); }
+  .proyecto-card-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(22, 56, 64, 0.85) 100%); }
+  .proyecto-card-content { position: absolute; bottom: 0; left: 0; right: 0; padding: var(--space-6); color: #fff; }
+  .proyecto-card-tipo { display: inline-block; background: rgba(255,255,255,0.18); backdrop-filter: blur(8px); padding: 4px 12px; border-radius: var(--radius-pill); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: var(--space-3); }
+  .proyecto-card h3 { color: #fff; font-size: 1.15rem; margin-bottom: var(--space-2); font-family: 'Fraunces', serif; font-weight: 500; }
+  .proyecto-card-meta { font-size: 0.82rem; color: rgba(255,255,255,0.75); display: flex; gap: var(--space-3); flex-wrap: wrap; }
+  .video-badge { position: absolute; top: var(--space-4); right: var(--space-4); background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); color: #fff; padding: 6px 10px; border-radius: var(--radius-pill); font-size: 0.72rem; font-weight: 600; z-index: 2; }
+
+  .cta-final { background: var(--c-azul-profundo); color: #fff; text-align: center; }
+  .cta-final h2 { color: #fff; font-size: var(--fs-h1); margin-bottom: var(--space-4); }
+  .cta-final p { color: rgba(255,255,255,0.7); font-size: 1.1rem; margin-bottom: var(--space-8); }
+</style>
+
+<script>
+  const cards = document.querySelectorAll<HTMLAnchorElement>('.proyecto-card');
+  const pills = document.querySelectorAll<HTMLButtonElement>('.filter-pill');
+  pills.forEach(p => p.addEventListener('click', () => {
+    pills.forEach(x => x.classList.remove('active'));
+    p.classList.add('active');
+    const f = p.dataset.filter, st = p.dataset.subtype;
+    cards.forEach(c => {
+      let show = true;
+      if (f && f !== 'todos' && c.dataset.tipo !== f) show = false;
+      if (st && c.dataset.subtipo !== st) show = false;
+      (c as HTMLElement).style.display = show ? '' : 'none';
+    });
+  }));
+</script>

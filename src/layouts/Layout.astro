@@ -1,0 +1,121 @@
+---
+import '../styles/global.css';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import MobileMenu from '../components/MobileMenu.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  ogImage?: string;
+  canonical?: string;
+  noindex?: boolean;
+  activeNav?: 'home' | 'servicios' | 'proyectos' | 'cotizador' | 'blog' | 'contacto';
+}
+
+const {
+  title,
+  description,
+  ogImage = '/og-default.jpg',
+  canonical,
+  noindex = false,
+  activeNav,
+} = Astro.props;
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://www.espazios.com.co';
+const canonicalUrl = canonical || `${siteUrl}${Astro.url.pathname}`;
+---
+
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={`${siteUrl}${ogImage}`} />
+    <meta property="og:locale" content="es_CO" />
+    <meta property="og:site_name" content="Espazios" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={`${siteUrl}${ogImage}`} />
+
+    <!-- Favicon (placeholder hasta logo final) -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Fuentes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Schema.org LocalBusiness -->
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "GeneralContractor",
+      "name": "Espazios",
+      "url": siteUrl,
+      "telephone": "+57 305 288 5923",
+      "email": "espazios.co@gmail.com",
+      "description": "Empresa de acabados, carpintería y remodelación integral en Bogotá, Soacha y alrededores.",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Calle 11B Bis A #78-24",
+        "addressLocality": "Bogotá",
+        "postalCode": "110821",
+        "addressCountry": "CO"
+      },
+      "geo": { "@type": "GeoCoordinates", "latitude": 4.6475827, "longitude": -74.1364549 },
+      "priceRange": "$$",
+      "areaServed": [
+        { "@type": "City", "name": "Bogotá" },
+        { "@type": "City", "name": "Soacha" },
+        { "@type": "City", "name": "Chía" },
+        { "@type": "City", "name": "Cota" },
+        { "@type": "City", "name": "Mosquera" },
+        { "@type": "City", "name": "Madrid" },
+        { "@type": "City", "name": "Cajicá" },
+        { "@type": "City", "name": "La Calera" },
+        { "@type": "City", "name": "Zipaquirá" }
+      ],
+      "openingHoursSpecification": [
+        { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"], "opens": "08:00", "closes": "18:00" },
+        { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Saturday"], "opens": "09:00", "closes": "13:00" }
+      ]
+    })} />
+  </head>
+  <body>
+    <Navbar activeNav={activeNav} />
+    <MobileMenu activeNav={activeNav} />
+
+    <main>
+      <slot />
+    </main>
+
+    <Footer />
+
+    <script>
+      // Reveal on scroll
+      const observer = new IntersectionObserver(
+        (entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add('visible')),
+        { threshold: 0.1 }
+      );
+      document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+    </script>
+  </body>
+</html>

@@ -1,0 +1,68 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  return posts.map((entry) => ({ params: { slug: entry.slug }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+const fmtDate = (d: Date) => d.toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' });
+---
+
+<Layout
+  title={entry.data.seoTitle || `${entry.data.title} — Espazios`}
+  description={entry.data.seoDescription || entry.data.excerpt}
+  activeNav="blog"
+>
+  <article>
+    <section class="post-hero">
+      <div class="container">
+        <div class="breadcrumb">
+          <a href="/">Inicio</a> &nbsp;›&nbsp; <a href="/blog">Blog</a> &nbsp;›&nbsp; <span class="cat-tag">{entry.data.categoria}</span>
+        </div>
+        <h1>{entry.data.title}</h1>
+        <div class="meta-row">
+          <span>📅 {fmtDate(entry.data.fechaPublicacion)}</span>
+          {entry.data.minutosLectura && <span>· {entry.data.minutosLectura} min de lectura</span>}
+          <span>· Por {entry.data.autor}</span>
+        </div>
+      </div>
+    </section>
+    <section class="post-content">
+      <div class="container">
+        <div class="content-wrap">
+          <Content />
+        </div>
+      </div>
+    </section>
+    <section class="cta-final">
+      <div class="container">
+        <h2>¿Listo para empezar tu proyecto?</h2>
+        <a href="/cotiza" class="btn btn-primary btn-large" style="background: var(--c-verde-claro); color: var(--c-azul-profundo);">Cotiza online en 3 minutos →</a>
+      </div>
+    </section>
+  </article>
+</Layout>
+
+<style>
+  .post-hero { padding: var(--space-12) 0 var(--space-8); background: linear-gradient(180deg, var(--c-bg) 0%, rgba(170, 191, 173, 0.12) 100%); }
+  .post-hero h1 { font-size: var(--fs-h1); margin-bottom: var(--space-4); max-width: 800px; }
+  .breadcrumb { font-size: 0.85rem; color: var(--c-text-muted); margin-bottom: var(--space-4); }
+  .breadcrumb a { color: var(--c-verde-texto); text-decoration: none; }
+  .cat-tag { color: var(--c-verde-texto); font-weight: 600; }
+  .meta-row { display: flex; gap: var(--space-2); flex-wrap: wrap; font-size: 0.9rem; color: var(--c-text-muted); }
+  .post-content { padding: var(--space-12) 0; }
+  .content-wrap { max-width: 760px; margin: 0 auto; }
+  .content-wrap :global(h2) { font-size: 1.5rem; margin-top: var(--space-12); margin-bottom: var(--space-4); }
+  .content-wrap :global(h2:first-child) { margin-top: 0; }
+  .content-wrap :global(h3) { font-size: 1.15rem; margin-top: var(--space-6); margin-bottom: var(--space-3); }
+  .content-wrap :global(p) { margin-bottom: var(--space-4); line-height: 1.7; }
+  .content-wrap :global(ul), .content-wrap :global(ol) { padding-left: var(--space-6); margin-bottom: var(--space-4); }
+  .content-wrap :global(li) { margin-bottom: var(--space-2); }
+  .content-wrap :global(a) { color: var(--c-verde-texto); }
+  .cta-final { background: var(--c-azul-profundo); color: #fff; text-align: center; padding: var(--space-16) 0; }
+  .cta-final h2 { color: #fff; font-size: var(--fs-h1); margin-bottom: var(--space-6); }
+</style>

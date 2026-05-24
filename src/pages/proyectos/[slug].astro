@@ -1,0 +1,129 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const proyectos = await getCollection('proyectos', ({ data }) => !data.draft);
+  return proyectos.map((entry) => ({ params: { slug: entry.slug }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+const fmtDate = (d: Date) => d.toLocaleDateString('es-CO', { year: 'numeric', month: 'long' });
+
+function getEmbedUrl(url?: string, plataforma?: string): string {
+  if (!url) return '';
+  try {
+    const u = new URL(url);
+    if (plataforma === 'YouTube') {
+      const v = u.searchParams.get('v');
+      if (v) return `https://www.youtube.com/embed/${v}`;
+      if (u.hostname.includes('youtu.be')) return `https://www.youtube.com/embed/${u.pathname.slice(1)}`;
+    }
+    if (plataforma === 'TikTok') {
+      const m = u.pathname.match(/\/video\/(\d+)/);
+      if (m) return `https://www.tiktok.com/embed/v2/${m[1]}`;
+    }
+    if (plataforma === 'Instagram') {
+      return url.replace(/\/?$/, '/') + 'embed';
+    }
+  } catch (e) { /* ignore */ }
+  return url;
+}
+---
+
+<Layout
+  title={entry.data.seoTitle || `${entry.data.title} — Espazios`}
+  description={entry.data.seoDescription || entry.data.descripcionCorta}
+  activeNav="proyectos"
+>
+  <article>
+    <section class="proyecto-hero">
+      <div class="container">
+        <div class="breadcrumb">
+          <a href="/">Inicio</a> &nbsp;›&nbsp; <a href="/proyectos">Proyectos</a> &nbsp;›&nbsp; {entry.data.title}
+        </div>
+        <h1>{entry.data.title}</h1>
+        <div class="meta-row">
+          <span>{entry.data.tipoProyecto}</span>
+          <span>·</span>
+          <span>📍 {entry.data.ciudad}{entry.data.barrio && `, ${entry.data.barrio}`}</span>
+          {entry.data.duracionSemanas && (<><span>·</span><span>{entry.data.duracionSemanas} semanas</span></>)}
+          <span>·</span>
+          <span>Entregado {fmtDate(entry.data.fechaEntrega)}</span>
+        </div>
+        <div class="hero-image"></div>
+      </div>
+    </section>
+
+    {entry.data.tieneVideo && entry.data.videoUrl && (
+      <section class="video-section">
+        <div class="container">
+          <h2>Mira este proyecto en video</h2>
+          <div class="video-wrapper">
+            <iframe src={getEmbedUrl(entry.data.videoUrl, entry.data.videoPlataforma)}
+              frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen loading="lazy"></iframe>
+          </div>
+        </div>
+      </section>
+    )}
+
+    <section class="proyecto-content">
+      <div class="container">
+        <div class="content-wrap">
+          <Content />
+        </div>
+      </div>
+    </section>
+
+    {entry.data.testimonioCliente && (
+      <section class="testimonio">
+        <div class="container">
+          <blockquote>
+            <p>"{entry.data.testimonioCliente}"</p>
+            {entry.data.nombreCliente && <cite>— {entry.data.nombreCliente}</cite>}
+          </blockquote>
+        </div>
+      </section>
+    )}
+
+    <section class="cta-final">
+      <div class="container">
+        <h2>¿Quieres un proyecto similar?</h2>
+        <a href="/cotiza" class="btn btn-primary btn-large" style="background: var(--c-verde-claro); color: var(--c-azul-profundo);">Cotizar mi proyecto →</a>
+      </div>
+    </section>
+  </article>
+</Layout>
+
+<style>
+  .proyecto-hero { padding: var(--space-8) 0 var(--space-12); background: linear-gradient(180deg, var(--c-bg) 0%, rgba(170, 191, 173, 0.12) 100%); }
+  .proyecto-hero h1 { font-size: var(--fs-h1); margin-bottom: var(--space-4); max-width: 800px; }
+  .breadcrumb { font-size: 0.85rem; color: var(--c-text-muted); margin-bottom: var(--space-4); }
+  .breadcrumb a { color: var(--c-verde-texto); text-decoration: none; }
+  .meta-row { display: flex; gap: var(--space-2); flex-wrap: wrap; font-size: 0.9rem; color: var(--c-text-muted); margin-bottom: var(--space-8); }
+  .hero-image { width: 100%; aspect-ratio: 16/9; background: linear-gradient(135deg, var(--c-azul-pizarra), var(--c-verde-salvia)); border-radius: var(--radius-lg); box-shadow: var(--shadow-medium); }
+
+  .video-section { padding: var(--space-12) 0; }
+  .video-section h2 { font-size: var(--fs-h2); margin-bottom: var(--space-6); text-align: center; }
+  .video-wrapper { max-width: 800px; margin: 0 auto; aspect-ratio: 16/9; border-radius: var(--radius-lg); overflow: hidden; background: #000; }
+  .video-wrapper iframe { width: 100%; height: 100%; border: 0; }
+
+  .proyecto-content { padding: var(--space-12) 0; }
+  .content-wrap { max-width: 760px; margin: 0 auto; }
+  .content-wrap :global(h2) { font-size: 1.5rem; margin-top: var(--space-12); margin-bottom: var(--space-4); }
+  .content-wrap :global(h2:first-child) { margin-top: 0; }
+  .content-wrap :global(h3) { font-size: 1.15rem; margin-top: var(--space-6); margin-bottom: var(--space-3); }
+  .content-wrap :global(p) { margin-bottom: var(--space-4); line-height: 1.65; }
+  .content-wrap :global(ul) { padding-left: var(--space-6); margin-bottom: var(--space-4); }
+  .content-wrap :global(li) { margin-bottom: var(--space-2); }
+
+  .testimonio { padding: var(--space-12) 0; background: rgba(170, 191, 173, 0.08); }
+  .testimonio blockquote { max-width: 760px; margin: 0 auto; text-align: center; }
+  .testimonio p { font-family: 'Fraunces', serif; font-style: italic; font-size: 1.4rem; color: var(--c-text-strong); margin-bottom: var(--space-4); }
+  .testimonio cite { font-size: 0.95rem; color: var(--c-text-muted); font-style: normal; }
+
+  .cta-final { background: var(--c-azul-profundo); color: #fff; text-align: center; padding: var(--space-16) 0; }
+  .cta-final h2 { color: #fff; font-size: var(--fs-h1); margin-bottom: var(--space-6); }
+</style>

@@ -1,0 +1,110 @@
+---
+import LegalLayout from '../layouts/LegalLayout.astro';
+---
+
+<LegalLayout
+  title="Habeas Data — Espazios"
+  description="Procedimiento de Habeas Data en Espazios: cómo ejercer tus derechos sobre datos personales según Ley 1581/2012 de Colombia."
+  pageTitle="Tus derechos sobre tus datos"
+  pageSubtitle="Como titular de datos personales, la ley colombiana te da derechos sobre cómo tratamos tu información. Aquí te explicamos cuáles son y cómo ejercerlos."
+  breadcrumb="Habeas Data"
+>
+  <div class="legal-meta">
+    <strong>Marco legal:</strong> Ley 1581 de 2012 · Decreto 1377 de 2013 · Decreto 090 de 2018<br>
+    <strong>Autoridad de control:</strong> Superintendencia de Industria y Comercio (SIC)<br>
+    <strong>Tiempo de respuesta:</strong> Máximo 10 días hábiles
+  </div>
+
+  <h2>¿Qué es el Habeas Data?</h2>
+  <p>El Habeas Data es un derecho fundamental que protege tu información personal. En Colombia está regulado por la <strong>Ley 1581 de 2012</strong> y te garantiza control sobre los datos que las empresas (como Espazios) recolectan, almacenan y usan sobre ti.</p>
+
+  <h2>Tus 6 derechos principales</h2>
+  <div class="derecho-card"><h3>👁 1. Derecho a conocer</h3><p>Saber qué datos personales tuyos tenemos almacenados, con qué finalidad los usamos y quién tiene acceso.</p></div>
+  <div class="derecho-card"><h3>✏️ 2. Derecho a actualizar y rectificar</h3><p>Pedirnos que actualicemos o corrijamos datos inexactos, incompletos o desactualizados.</p></div>
+  <div class="derecho-card"><h3>📜 3. Derecho a solicitar prueba</h3><p>Pedirnos prueba de la autorización que diste para tratar tus datos.</p></div>
+  <div class="derecho-card"><h3>🚫 4. Derecho a revocar y suprimir</h3><p>Retirar tu consentimiento y solicitar la eliminación de tus datos cuando no haya obligación legal de conservarlos.</p></div>
+  <div class="derecho-card"><h3>🆓 5. Derecho a acceder gratuitamente</h3><p>Consultar tus datos sin costo, siempre y cuando no sea con una frecuencia abusiva.</p></div>
+  <div class="derecho-card"><h3>⚖️ 6. Derecho a quejarte ante la SIC</h3><p>Si no atendemos correctamente tu solicitud, puedes acudir a la Superintendencia de Industria y Comercio.</p></div>
+
+  <h2>Procedimiento paso a paso</h2>
+  <div class="procedure-step"><div class="step-num">1</div><div class="step-content"><h4>Envía tu solicitud por email</h4><p>Escribe a <a href="mailto:datos@espazios.com.co"><strong>datos@espazios.com.co</strong></a> incluyendo: nombre completo, documento, email, teléfono, derecho a ejercer, descripción de la solicitud y prueba de identidad.</p></div></div>
+  <div class="procedure-step"><div class="step-num">2</div><div class="step-content"><h4>Recibes acuse</h4><p>En máximo <strong>48 horas hábiles</strong> confirmamos recepción.</p></div></div>
+  <div class="procedure-step"><div class="step-num">3</div><div class="step-content"><h4>Respuesta en 10 días hábiles</h4><p>Por ley tenemos hasta 10 días para atender tu solicitud. Si requiere más, te notificamos.</p></div></div>
+  <div class="procedure-step"><div class="step-num">4</div><div class="step-content"><h4>Recibes respuesta</h4><p>Por el mismo medio confirmamos la acción realizada o explicamos por qué no podemos.</p></div></div>
+  <div class="procedure-step"><div class="step-num">5</div><div class="step-content"><h4>Si no estás conforme: SIC</h4><p>Puedes presentar queja ante la <strong>Superintendencia de Industria y Comercio</strong> en <a href="https://www.sic.gov.co">www.sic.gov.co</a>.</p></div></div>
+
+  <div class="cta-email">
+    <h3>¿Listo para ejercer un derecho?</h3>
+    <p>Escríbenos directamente. Te respondemos en menos de 48 horas hábiles.</p>
+    <a href="mailto:datos@espazios.com.co?subject=Solicitud%20Habeas%20Data" class="email-btn">📧 datos@espazios.com.co</a>
+  </div>
+
+  <h2>Preguntas frecuentes</h2>
+  <h3>¿Tiene algún costo ejercer mis derechos?</h3>
+  <p>No. La ley colombiana garantiza acceso gratuito a tus datos personales.</p>
+
+  <h3>¿Cuánto tiempo conservan mis datos?</h3>
+  <ul>
+    <li>Lead no convertido: 24 meses desde último contacto.</li>
+    <li>Cliente con contrato: 10 años (obligación tributaria).</li>
+    <li>Suscriptor al boletín: hasta cancelación.</li>
+  </ul>
+
+  <h3>¿Aplica si soy persona jurídica?</h3>
+  <p>Sí. También tienes derecho sobre datos asociados al NIT.</p>
+
+  <h2>Autoridad de control: SIC</h2>
+  <ul>
+    <li><strong>Dirección:</strong> Carrera 13 # 27 - 00, Bogotá D.C.</li>
+    <li><strong>Email:</strong> <a href="mailto:habeasdata@sic.gov.co">habeasdata@sic.gov.co</a></li>
+    <li><strong>Teléfono:</strong> (601) 587 0000</li>
+    <li><strong>Línea gratuita:</strong> 01 8000 910 165</li>
+    <li><strong>Web:</strong> <a href="https://www.sic.gov.co" target="_blank">www.sic.gov.co</a></li>
+  </ul>
+
+  <p style="margin-top: var(--space-12); padding-top: var(--space-6); border-top: 1px solid var(--c-border); color: var(--c-text-muted); font-size: 0.9rem;">Más información en nuestra <a href="/politica-privacidad">Política de Privacidad</a>.</p>
+</LegalLayout>
+
+<style is:global>
+  .derecho-card {
+    background: var(--c-bg-elev);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    margin-bottom: var(--space-4);
+  }
+  .derecho-card h3 {
+    display: flex; align-items: center; gap: var(--space-3);
+    margin-bottom: var(--space-3);
+    margin-top: 0;
+  }
+  .procedure-step {
+    display: flex; gap: var(--space-4); margin-bottom: var(--space-6);
+    padding-bottom: var(--space-6); border-bottom: 1px solid var(--c-border);
+  }
+  .procedure-step:last-of-type { border-bottom: none; }
+  .step-num {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--c-verde-texto); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif; font-weight: 600; flex-shrink: 0;
+  }
+  .step-content h4 {
+    font-family: 'Inter', sans-serif; font-size: 1.05rem;
+    font-weight: 600; margin-bottom: var(--space-2);
+    color: var(--c-text-strong); margin-top: 0;
+  }
+  .cta-email {
+    background: var(--c-azul-profundo); color: #fff;
+    padding: var(--space-8); border-radius: var(--radius-lg);
+    text-align: center; margin: var(--space-12) 0;
+  }
+  .cta-email h3 { color: #fff; margin-bottom: var(--space-3); margin-top: 0; }
+  .cta-email p { color: rgba(255,255,255,0.8); margin-bottom: var(--space-6); }
+  .cta-email .email-btn {
+    display: inline-block;
+    background: var(--c-verde-claro); color: var(--c-azul-profundo);
+    padding: 14px 28px; border-radius: var(--radius-pill);
+    font-weight: 600; text-decoration: none;
+  }
+</style>

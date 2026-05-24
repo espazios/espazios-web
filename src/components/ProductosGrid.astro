@@ -1,0 +1,91 @@
+---
+const productos = [
+  {
+    titulo: 'Remodelación completa',
+    sub: 'Incluye acabados y carpintería.',
+    bullets: ['Diseño 3D + planos técnicos', 'Ejecución integral llave en mano', 'Garantía 1 año en acabados'],
+    cobertura: '📍 Bogotá · Soacha',
+    recomendado: true,
+    placeholder: 'Foto: Remodelación integral terminada',
+  },
+  {
+    titulo: 'Carpintería',
+    sub: 'Cocina, closets, puertas, muebles de baño y mobiliario a medida.',
+    bullets: ['Diseño paramétrico', 'Materiales termolaminados o lacados', 'Instalación profesional'],
+    cobertura: '📍 Bogotá · Alrededores',
+    recomendado: false,
+    placeholder: 'Foto: Cocina + closet a medida',
+  },
+  {
+    titulo: 'Solo acabados',
+    sub: 'Enchapes, pintura, divisiones y terminaciones de obra blanca.',
+    bullets: ['Porcelanato, cerámica, microcemento', 'Pintura técnica anti-humedad', 'Drywall y cielos rasos'],
+    cobertura: '📍 Bogotá · Soacha',
+    recomendado: false,
+    placeholder: 'Foto: Detalle de enchapes premium',
+  },
+];
+---
+
+<section id="productos">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Nuestros servicios</span>
+      <h2>Tres formas de transformar tu espacio</h2>
+      <p>Diseñamos la solución que se adapta a tu proyecto, presupuesto y tiempos.</p>
+    </div>
+    <div class="productos-grid">
+      {productos.map((p) => (
+        <article class="producto-card reveal">
+          <div class="producto-img">
+            {p.recomendado && <div class="producto-badge">Recomendado</div>}
+            <div class="placeholder-img">{p.placeholder}</div>
+          </div>
+          <div class="producto-body">
+            <h3>{p.titulo}</h3>
+            <p class="sub">{p.sub}</p>
+            <ul class="producto-bullets">
+              {p.bullets.map((b) => <li>{b}</li>)}
+            </ul>
+            <span class="cobertura">{p.cobertura}</span>
+            <a href="/cotiza" class="btn btn-primary">Cotizar {p.titulo.toLowerCase()} →</a>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .productos-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-6); }
+  @media (min-width: 900px) { .productos-grid { grid-template-columns: repeat(3, 1fr); } }
+  .producto-card {
+    background: var(--c-bg-elev); border-radius: var(--radius-lg);
+    overflow: hidden; box-shadow: var(--shadow-soft);
+    transition: transform var(--t-base), box-shadow var(--t-base);
+    display: flex; flex-direction: column; position: relative;
+  }
+  .producto-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-medium); }
+  .producto-img { height: 220px; position: relative; overflow: hidden; }
+  .placeholder-img {
+    width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, var(--c-verde-neutro), var(--c-verde-salvia));
+    color: rgba(255,255,255,0.85); font-family: 'Fraunces', serif; font-style: italic;
+    font-size: 0.85rem; padding: var(--space-4); text-align: center;
+  }
+  .producto-badge {
+    position: absolute; top: var(--space-4); left: var(--space-4);
+    background: var(--c-azul-profundo); color: var(--c-verde-claro);
+    padding: 6px 12px; border-radius: var(--radius-pill);
+    font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+    z-index: 2;
+  }
+  .producto-body { padding: var(--space-6); flex: 1; display: flex; flex-direction: column; }
+  .producto-card h3 { font-size: var(--fs-h3); margin-bottom: var(--space-2); }
+  .producto-card .sub { color: var(--c-text-muted); font-size: 0.95rem; margin-bottom: var(--space-4); }
+  .producto-bullets { list-style: none; margin-bottom: var(--space-4); flex: 1; padding: 0; }
+  .producto-bullets li { display: flex; align-items: start; gap: var(--space-2); font-size: 0.92rem; margin-bottom: var(--space-2); color: var(--c-text-body); }
+  .producto-bullets li::before { content: "✓"; color: var(--c-verde-texto); font-weight: 700; flex-shrink: 0; }
+  .cobertura { font-size: 0.8rem; color: var(--c-text-muted); padding: var(--space-2) var(--space-3); background: rgba(170, 191, 173, 0.15); border-radius: var(--radius-sm); margin-bottom: var(--space-4); display: inline-block; }
+  .producto-card .btn { width: 100%; text-transform: capitalize; }
+</style>

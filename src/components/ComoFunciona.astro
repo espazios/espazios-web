@@ -1,0 +1,36 @@
+---
+const pasos = [
+  { num: 1, titulo: 'Cotizas', desc: 'Diligencias el cotizador en 3 minutos. Te contactamos en menos de 24h hábiles.' },
+  { num: 2, titulo: 'Diseñamos', desc: 'Visita técnica + propuesta visual con renders 3D y planos.' },
+  { num: 3, titulo: 'Ejecutamos', desc: 'Obra con equipo propio, supervisión semanal y reporte fotográfico.' },
+  { num: 4, titulo: 'Entregamos', desc: 'Caminata final con checklist y garantía de 1 año sobre acabados.' },
+];
+---
+
+<section id="proceso">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Cómo funciona</span>
+      <h2>Un proceso claro, sin sorpresas</h2>
+      <p>Te acompañamos desde el primer dibujo hasta la caminata final de entrega.</p>
+    </div>
+    <div class="proceso">
+      {pasos.map(p => (
+        <div class="paso reveal">
+          <div class="paso-num">{p.num}</div>
+          <h3>{p.titulo}</h3>
+          <p>{p.desc}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .proceso { display: grid; grid-template-columns: 1fr; gap: var(--space-8); position: relative; }
+  @media (min-width: 800px) { .proceso { grid-template-columns: repeat(4, 1fr); gap: var(--space-4); } }
+  .paso { text-align: center; padding: var(--space-6); position: relative; }
+  .paso-num { width: 56px; height: 56px; background: rgba(118, 166, 143, 0.1); color: var(--c-verde-texto); border: 2px solid var(--c-verde-texto); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fraunces', serif; font-size: 1.5rem; font-weight: 600; margin: 0 auto var(--space-4); }
+  .paso h3 { font-size: 1.25rem; margin-bottom: var(--space-2); }
+  .paso p { color: var(--c-text-muted); font-size: 0.92rem; }
+</style>

@@ -1,0 +1,81 @@
+---
+interface Props {
+  activeNav?: string;
+}
+const links = [
+  { href: '/#productos', label: 'Servicios' },
+  { href: '/proyectos', label: 'Proyectos' },
+  { href: '/cotiza', label: 'Cotizar' },
+  { href: '/blog', label: 'Blog' },
+  { href: '/#contacto', label: 'Contacto' },
+];
+---
+
+<div class="mobile-menu" id="mobileMenu" aria-hidden="true" role="dialog" aria-label="Menú principal">
+  <nav>
+    <ul>
+      {links.map((link) => (
+        <li><a href={link.href}>{link.label}</a></li>
+      ))}
+    </ul>
+    <div class="mobile-menu-cta">
+      <a href="/cotiza" class="btn btn-primary">Cotiza tu proyecto →</a>
+    </div>
+  </nav>
+</div>
+
+<style>
+  .mobile-menu {
+    position: fixed; inset: 0;
+    background: rgba(22, 56, 64, 0.97);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 101;
+    opacity: 0; visibility: hidden;
+    transition: opacity 300ms, visibility 0s 300ms;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .mobile-menu[aria-hidden="false"] {
+    opacity: 1; visibility: visible;
+    transition: opacity 300ms;
+  }
+  .mobile-menu ul {
+    list-style: none; text-align: center;
+    display: flex; flex-direction: column; gap: var(--space-6);
+    padding: 0;
+  }
+  .mobile-menu a {
+    color: #fff; text-decoration: none;
+    font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 500;
+    display: inline-block; padding: var(--space-3) var(--space-6);
+    transition: color 200ms;
+  }
+  .mobile-menu a:hover, .mobile-menu a:focus { color: var(--c-verde-claro); }
+  .mobile-menu-cta { margin-top: var(--space-8); display: flex; justify-content: center; }
+  .mobile-menu-cta :global(.btn-primary) {
+    background: var(--c-verde-claro); color: var(--c-azul-profundo);
+    padding: 16px 36px;
+  }
+  :global(body.menu-open) { overflow: hidden; }
+  @media (min-width: 900px) { .mobile-menu { display: none; } }
+</style>
+
+<script>
+  const toggle = document.getElementById('menuToggle');
+  const menu = document.getElementById('mobileMenu');
+  if (toggle && menu) {
+    const setOpen = (open: boolean) => {
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+      menu.setAttribute('aria-hidden', String(!open));
+      document.body.classList.toggle('menu-open', open);
+    };
+    toggle.addEventListener('click', () => {
+      setOpen(toggle.getAttribute('aria-expanded') !== 'true');
+    });
+    menu.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setOpen(false)));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') setOpen(false);
+    });
+  }
+</script>

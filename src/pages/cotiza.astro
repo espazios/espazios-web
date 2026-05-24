@@ -1,0 +1,26 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Cotizador from '../components/Cotizador.astro';
+---
+
+<Layout
+  title="Cotiza tu proyecto en 3 minutos — Espazios Bogotá"
+  description="Cotizador online de remodelación, carpintería o acabados en Bogotá. Recibe asesoría personalizada en menos de 24 horas hábiles."
+  activeNav="cotizador"
+>
+  <section class="page-hero-small">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="/">Inicio</a> &nbsp;›&nbsp; Cotizar
+      </div>
+    </div>
+  </section>
+  <Cotizador />
+</Layout>
+
+<style>
+  .page-hero-small { padding: var(--space-8) 0 0; }
+  .breadcrumb { font-size: 0.85rem; color: var(--c-text-muted); }
+  .breadcrumb a { color: var(--c-verde-texto); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+</style>

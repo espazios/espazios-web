@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Bloquear panel admin (no debe indexarse)
+Disallow: /admin
+
+# Sitemap
+Sitemap: https://www.espazios.com.co/sitemap-index.xml

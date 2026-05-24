@@ -1,6 +1,5 @@
 import { defineConfig } from 'astro/config';
 import vercel from '@astrojs/vercel/serverless';
-import sitemap from '@astrojs/sitemap';
 import mdx from '@astrojs/mdx';
 
 export default defineConfig({
@@ -12,10 +11,6 @@ export default defineConfig({
   }),
   integrations: [
     mdx(),
-    sitemap({
-      changefreq: 'weekly',
-      priority: 0.7,
-    }),
   ],
   build: {
     inlineStylesheets: 'auto',

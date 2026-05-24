@@ -13,15 +13,10 @@ export default defineConfig({
   integrations: [
     mdx(),
     sitemap({
-      i18n: { defaultLocale: 'es', locales: { es: 'es-CO' } },
       changefreq: 'weekly',
       priority: 0.7,
     }),
   ],
-  i18n: {
-    defaultLocale: 'es',
-    locales: ['es'],
-  },
   build: {
     inlineStylesheets: 'auto',
   },

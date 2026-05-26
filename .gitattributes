@@ -1,0 +1,14 @@
+# Normalizar line endings a LF (Unix) en todo el repo
+* text=auto eol=lf
+
+# Forzar binarios (no convertir)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.pdf binary

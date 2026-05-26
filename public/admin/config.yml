@@ -6,7 +6,10 @@ backend:
   name: github
   repo: espazios/espazios-web
   branch: main
-  base_url: https://api.netlify.com  # OAuth gateway (requiere conexión a Netlify gratuita)
+  # OAuth proxy propio en Vercel (mismo sitio).
+  # Para producción definitiva cambiar a https://www.espazios.com.co
+  base_url: https://espazios-web-git-main-espazios-8361s-projects.vercel.app
+  auth_endpoint: /api/auth
 
 media_folder: "public/uploads"
 public_folder: "/uploads"
@@ -22,13 +25,14 @@ collections:
     folder: "src/content/proyectos"
     create: true
     slug: "{{slug}}"
-    summary: "{{title}} · {{ciudad}} · {{duracionSemanas}} semanas"
-    sortable_fields: ["fechaEntrega", "title", "ciudad"]
+    summary: "{{title}} · {{torre}} · {{ciudad}}"
+    sortable_fields: ["fechaEntrega", "title", "torre", "ciudad"]
     fields:
-      - { name: "title", label: "Título del proyecto", widget: "string", hint: "Ej: Cocina integral con isla — Cedritos" }
-      - { name: "tipoProyecto", label: "Tipo de proyecto", widget: "select", options: ["Remodelación completa", "Carpintería", "Solo acabados"] }
+      - { name: "title", label: "Título del proyecto", widget: "string", hint: "Ej: Porto Hayuelos — Apartamento 39m² de Javier y Luis" }
+      - { name: "tipoProyecto", label: "Modalidad", widget: "select", options: ["Full Acabados", "Solo Carpintería", "Solo Obra Blanca"] }
+      - { name: "torre", label: "Torre / proyecto", widget: "string", required: false, hint: "Ej: Porto Hayuelos, Centrik Park, Nova Tramonte, Sabantti" }
       - { name: "subtipo", label: "Subtipo", widget: "select", required: false, options: ["Cocina", "Baño", "Apartamento", "Closet", "Sala", "Oficina", "Local"] }
-      - { name: "ciudad", label: "Ciudad", widget: "string" }
+      - { name: "ciudad", label: "Ciudad", widget: "string", default: "Bogotá" }
       - { name: "barrio", label: "Barrio o conjunto", widget: "string", required: false }
       - { name: "descripcionCorta", label: "Descripción corta (1 línea para card)", widget: "string" }
       - { name: "fotoPortada", label: "Foto portada", widget: "image", required: false, hint: "Ideal 1200×800px, comprimida (<300KB)" }
@@ -36,11 +40,11 @@ collections:
       - { name: "fotoDespues", label: "Foto después", widget: "image", required: false }
       - { name: "galeria", label: "Galería adicional", widget: "list", required: false, field: { name: "imagen", label: "Imagen", widget: "image" } }
       - { name: "duracionSemanas", label: "Duración (semanas)", widget: "number", required: false }
-      - { name: "rangoPresupuesto", label: "Rango presupuesto", widget: "string", required: false, hint: "Ej: $30M-$45M" }
+      - { name: "rangoPresupuesto", label: "Rango presupuesto", widget: "string", required: false, hint: "Ej: $18M-$22M" }
       - { name: "destacado", label: "Destacar en home", widget: "boolean", default: false }
       - { name: "fechaEntrega", label: "Fecha de entrega", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false }
       - { name: "testimonioCliente", label: "Testimonio del cliente", widget: "text", required: false }
-      - { name: "nombreCliente", label: "Nombre del cliente", widget: "string", required: false, hint: "Puede ser anónimo: 'Familia García'" }
+      - { name: "nombreCliente", label: "Nombre del cliente", widget: "string", required: false, hint: "Puede ser solo nombre: 'Javier y Luis'" }
       - { name: "etiquetas", label: "Etiquetas", widget: "list", required: false, default: [] }
       - { name: "tieneVideo", label: "¿Tiene video?", widget: "boolean", default: false }
       - { name: "videoUrl", label: "URL del video", widget: "string", required: false, hint: "TikTok, Instagram o YouTube" }

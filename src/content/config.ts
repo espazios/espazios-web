@@ -48,4 +48,4 @@ const blog = defineCollection({
   }),
 });
 
-export const co
+export const collections = { proyectos, blog };

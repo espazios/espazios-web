@@ -1,0 +1,113 @@
+---
+const torres = [
+  { nombre: 'Centrik Park', zona: 'Bogotá', proyectos: '12+ apartamentos' },
+  { nombre: 'Centrik Town', zona: 'Bogotá', proyectos: '8+ apartamentos' },
+  { nombre: 'Nova Tramonte', zona: 'Bogotá', proyectos: '15+ apartamentos' },
+  { nombre: 'Tramonte Living', zona: 'Bogotá', proyectos: '10+ apartamentos' },
+  { nombre: 'Sabantti', zona: 'Bogotá', proyectos: '14+ apartamentos' },
+  { nombre: 'Vértice', zona: 'Bogotá', proyectos: '9+ apartamentos' },
+  { nombre: 'La Salle Gallet', zona: 'Bogotá', proyectos: '7+ apartamentos' },
+  { nombre: 'Buenavista Living', zona: 'Bogotá', proyectos: '6+ apartamentos' },
+  { nombre: 'Urbania', zona: 'Bogotá', proyectos: '5+ apartamentos' },
+  { nombre: 'Torres de Saira', zona: 'Bogotá', proyectos: '4+ apartamentos' },
+  { nombre: 'Porto Hayuelos', zona: 'Bogotá', proyectos: '6+ apartamentos' },
+  { nombre: 'Primavera 6-39', zona: 'Bogotá', proyectos: '4+ apartamentos' },
+];
+---
+
+<section id="torres" class="torres">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">ESPECIALISTAS POR PROYECTO</span>
+      <h2>Conocemos tu torre, ya lo sabemos todo</h2>
+      <p>
+        Llevamos años trabajando en proyectos VIS de Bogotá. Sabemos las medidas exactas,
+        dónde van las redes, qué muebles caben en qué espacios y qué materiales rinden mejor
+        en cada torre.
+      </p>
+    </div>
+
+    <div class="torres-grid">
+      {torres.map((t) => (
+        <article class="torre-card reveal">
+          <div class="torre-icon">🏢</div>
+          <h3>{t.nombre}</h3>
+          <p class="torre-zona">{t.zona}</p>
+          <span class="torre-proyectos">{t.proyectos}</span>
+        </article>
+      ))}
+    </div>
+
+    <div class="torres-cta reveal">
+      <p>¿No ves tu torre? Probablemente también la conocemos.</p>
+      <a href="/cotiza" class="btn btn-primary btn-large">Pregúntanos por tu torre →</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .torres { background: var(--c-bg); padding: var(--space-16) 0; }
+  .torres-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+    margin-bottom: var(--space-12);
+  }
+  @media (min-width: 600px) { .torres-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (min-width: 900px) { .torres-grid { grid-template-columns: repeat(4, 1fr); } }
+  @media (min-width: 1100px) { .torres-grid { grid-template-columns: repeat(6, 1fr); } }
+
+  .torre-card {
+    background: var(--c-bg-elev);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-5) var(--space-4);
+    text-align: center;
+    transition: transform var(--t-base), box-shadow var(--t-base), border-color var(--t-base);
+  }
+  .torre-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-medium);
+    border-color: var(--c-verde-salvia);
+  }
+  .torre-icon {
+    font-size: 1.5rem;
+    margin-bottom: var(--space-3);
+    opacity: 0.6;
+  }
+  .torre-card h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--c-text-strong);
+    margin-bottom: var(--space-1);
+    line-height: 1.2;
+  }
+  .torre-zona {
+    font-size: 0.78rem;
+    color: var(--c-text-muted);
+    margin-bottom: var(--space-2);
+  }
+  .torre-proyectos {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--c-verde-texto);
+    background: rgba(118, 166, 143, 0.12);
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    letter-spacing: 0.02em;
+  }
+  .torres-cta {
+    text-align: center;
+    padding-top: var(--space-8);
+    border-top: 1px solid var(--c-border);
+  }
+  .torres-cta p {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--c-text-muted);
+    margin-bottom: var(--space-4);
+    font-size: 1.1rem;
+  }
+</style>

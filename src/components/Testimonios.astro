@@ -1,0 +1,115 @@
+---
+const testimonios = [
+  {
+    cita: 'Mi apartamento luce muy bien después de la remodelación, me generaron confianza gracias a su acompañamiento.',
+    nombre: 'Ana Melo',
+    rol: 'Propietaria',
+    iniciales: 'AM',
+  },
+  {
+    cita: 'Los acabados de mi hogar son simplemente asombrosos, estoy muy feliz con el resultado final.',
+    nombre: 'Camenza Loaiza',
+    rol: 'Propietaria',
+    iniciales: 'CL',
+  },
+  {
+    cita: 'Hombre, la verdad es que quedé muy contento con la nueva apariencia de mi casa, los recomiendo mucho.',
+    nombre: 'Esteban Vargas',
+    rol: 'Propietario',
+    iniciales: 'EV',
+  },
+];
+---
+
+<section class="testimonios">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">LO QUE DICEN NUESTROS CLIENTES</span>
+      <h2>Historias de gente que dejó el arriendo</h2>
+      <p>Testimonios reales de propietarios que confiaron en Espazios para su primer apartamento.</p>
+    </div>
+
+    <div class="testimonios-grid">
+      {testimonios.map(t => (
+        <article class="testimonio-card reveal">
+          <div class="testimonio-mark">"</div>
+          <p class="testimonio-cita">{t.cita}</p>
+          <div class="testimonio-autor">
+            <div class="avatar">{t.iniciales}</div>
+            <div>
+              <div class="nombre">{t.nombre}</div>
+              <div class="rol">{t.rol}</div>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .testimonios { padding: var(--space-16) 0; background: var(--c-bg); }
+  .testimonios-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+  @media (min-width: 700px) { .testimonios-grid { grid-template-columns: repeat(3, 1fr); } }
+
+  .testimonio-card {
+    position: relative;
+    background: var(--c-bg-elev);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-8) var(--space-6) var(--space-6);
+    transition: transform var(--t-base), box-shadow var(--t-base);
+  }
+  .testimonio-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-medium);
+  }
+  .testimonio-mark {
+    position: absolute;
+    top: -10px; left: var(--space-6);
+    font-family: 'Fraunces', serif;
+    font-size: 4rem;
+    font-weight: 700;
+    color: var(--c-verde-salvia);
+    line-height: 1;
+    opacity: 0.4;
+  }
+  .testimonio-cita {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    line-height: 1.55;
+    color: var(--c-text-body);
+    margin-bottom: var(--space-6);
+  }
+  .testimonio-autor {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--c-border);
+  }
+  .testimonio-autor .avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--c-azul-pizarra);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+  .testimonio-autor .nombre {
+    font-weight: 600;
+    color: var(--c-text-strong);
+    font-size: 0.95rem;
+  }
+  .testimonio-autor .rol {
+    font-size: 0.78rem;
+    color: var(--c-text-muted);
+  }
+</style>

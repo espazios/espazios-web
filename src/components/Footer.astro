@@ -7,35 +7,35 @@ const currentYear = new Date().getFullYear();
     <div class="footer-grid">
       <div>
         <a href="/" class="footer-logo-placeholder">esp<span>azios</span></a>
-        <p class="footer-tagline">Acabados y remodelación con respaldo.</p>
+        <p class="footer-tagline">Especialistas en acabados de apartamentos en obra gris.</p>
       </div>
       <div>
-        <h4>Servicios</h4>
+        <h4>Modalidades</h4>
         <ul>
-          <li><a href="/#productos">Remodelación completa</a></li>
-          <li><a href="/#productos">Carpintería</a></li>
-          <li><a href="/#productos">Solo acabados</a></li>
-          <li><a href="/cotiza">Cotizar mi proyecto</a></li>
+          <li><a href="/#productos">Full Acabados</a></li>
+          <li><a href="/#productos">Solo Carpintería</a></li>
+          <li><a href="/#productos">Solo Obra Blanca</a></li>
+          <li><a href="/cotiza">Cotiza tu apartamento</a></li>
         </ul>
       </div>
       <div>
         <h4>Empresa</h4>
         <ul>
-          <li><a href="/proyectos">Proyectos</a></li>
+          <li><a href="/#torres">Torres que conocemos</a></li>
+          <li><a href="/proyectos">Proyectos entregados</a></li>
           <li><a href="/blog">Blog</a></li>
-          <li><a href="/#contacto">Contacto</a></li>
           <li><a href="/#por-que">Por qué Espazios</a></li>
         </ul>
       </div>
       <div class="footer-contacto">
         <h4>Contacto</h4>
-        <p>📞 +57 305 288 5923</p>
-        <p>📧 espazios.co@gmail.com</p>
-        <p>📍 Bogotá, Colombia</p>
-        <p style="margin-top: var(--space-3);">
-          <a href="https://instagram.com/espazios.co" target="_blank" rel="noopener">Instagram</a> ·
-          <a href="https://facebook.com/espazios.co" target="_blank" rel="noopener">Facebook</a> ·
-          <a href="https://tiktok.com/@espazios.co" target="_blank" rel="noopener">TikTok</a>
+        <p>📞 <a href="https://wa.me/573108708467" target="_blank" rel="noopener">+57 310 870 8467</a></p>
+        <p>📧 <a href="mailto:espazios.co@gmail.com">espazios.co@gmail.com</a></p>
+        <p>📍 Cl. 65 # 11 - 34<br/>Of. 305B, Chapinero<br/>Bogotá, Colombia</p>
+        <p class="footer-socials">
+          <a href="https://www.tiktok.com/@espazios" target="_blank" rel="noopener">TikTok</a> ·
+          <a href="https://www.instagram.com/espazios.com.co/" target="_blank" rel="noopener">Instagram</a> ·
+          <a href="https://facebook.com/espazios.co" target="_blank" rel="noopener">Facebook</a>
         </p>
       </div>
     </div>
@@ -57,7 +57,7 @@ const currentYear = new Date().getFullYear();
     margin-top: var(--space-16);
   }
   .footer-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-8); }
-  @media (min-width: 700px) { .footer-grid { grid-template-columns: 1.5fr 1fr 1fr 1.2fr; } }
+  @media (min-width: 700px) { .footer-grid { grid-template-columns: 1.5fr 1fr 1fr 1.3fr; } }
   footer h4 {
     color: #fff; font-family: 'Inter', sans-serif; font-weight: 600;
     font-size: 0.95rem; margin-bottom: var(--space-4);
@@ -85,12 +85,7 @@ const currentYear = new Date().getFullYear();
     color: rgba(255,255,255,0.7);
     margin-top: var(--space-3); font-size: 0.95rem;
   }
-  .footer-contacto p { font-size: 0.9rem; margin-bottom: var(--space-2); }
+  .footer-contacto p { font-size: 0.9rem; margin-bottom: var(--space-2); line-height: 1.5; }
+  .footer-socials { margin-top: var(--space-3); }
   .footer-bottom {
-    border-top: 1px solid rgba(255,255,255,0.1);
-    padding-top: var(--space-6); margin-top: var(--space-12);
-    display: flex; flex-wrap: wrap; justify-content: space-between;
-    gap: var(--space-4);
-    font-size: var(--fs-small); color: rgba(255,255,255,0.5);
-  }
-</style>
+    border-to

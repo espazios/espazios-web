@@ -1,0 +1,81 @@
+---
+const aliados = [
+  { nombre: 'Homecenter Sodimac', iniciales: 'HC' },
+  { nombre: 'Corona', iniciales: 'CO' },
+  { nombre: 'Pintuco', iniciales: 'PT' },
+  { nombre: 'Argos', iniciales: 'AR' },
+];
+---
+
+<section class="aliados">
+  <div class="container">
+    <div class="section-head reveal aliados-head">
+      <span class="eyebrow">TRABAJAMOS CON</span>
+      <h2>Aliados que respaldan la calidad</h2>
+      <p>Materiales de marcas reconocidas con garantía documentada por proveedor.</p>
+    </div>
+    <div class="aliados-row reveal">
+      {aliados.map(a => (
+        <div class="aliado-card" title={a.nombre}>
+          <div class="aliado-mark">{a.iniciales}</div>
+          <div class="aliado-name">{a.nombre}</div>
+        </div>
+      ))}
+    </div>
+    <p class="aliados-note reveal">
+      <em>Logos oficiales próximamente. Mientras tanto, mostramos los nombres de nuestros aliados.</em>
+    </p>
+  </div>
+</section>
+
+<style>
+  .aliados {
+    padding: var(--space-12) 0;
+    background: var(--c-bg-elev);
+    border-top: 1px solid var(--c-border);
+    border-bottom: 1px solid var(--c-border);
+  }
+  .aliados-head { margin-bottom: var(--space-8); }
+  .aliados-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+  }
+  @media (min-width: 700px) { .aliados-row { grid-template-columns: repeat(4, 1fr); } }
+  .aliado-card {
+    background: var(--c-bg);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+    text-align: center;
+    transition: border-color var(--t-base), transform var(--t-base);
+  }
+  .aliado-card:hover {
+    border-color: var(--c-verde-salvia);
+    transform: translateY(-2px);
+  }
+  .aliado-mark {
+    width: 56px; height: 56px;
+    margin: 0 auto var(--space-3);
+    background: linear-gradient(135deg, var(--c-verde-neutro), var(--c-verde-salvia));
+    color: #fff;
+    border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+  .aliado-name {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--c-text-strong);
+  }
+  .aliados-note {
+    text-align: center;
+    font-size: 0.82rem;
+    color: var(--c-text-muted);
+    font-family: 'Fraunces', serif;
+  }
+</style>

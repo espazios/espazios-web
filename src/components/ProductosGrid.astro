@@ -1,28 +1,46 @@
 ---
 const productos = [
   {
-    titulo: 'Remodelación completa',
-    sub: 'Incluye acabados y carpintería.',
-    bullets: ['Diseño 3D + planos técnicos', 'Ejecución integral llave en mano', 'Garantía 1 año en acabados'],
-    cobertura: '📍 Bogotá · Soacha',
+    titulo: 'Full Acabados',
+    sub: 'Te entregamos el apartamento listo para mudarte.',
+    bullets: [
+      'Pisos, enchape y pintura profesional',
+      'Cocina integral + closets a la medida',
+      'Baños completos terminados',
+      'Diseño 3D antes de iniciar la obra',
+    ],
+    cobertura: 'Desde 15 millones · Bogotá',
     recomendado: true,
-    placeholder: 'Foto: Remodelación integral terminada',
+    placeholder: 'Foto: Cocina + sala terminadas (recomendado: Centrik Park, Nova Tramonte o Sabantti)',
+    cta: 'Cotizar full acabados',
   },
   {
-    titulo: 'Carpintería',
-    sub: 'Cocina, closets, puertas, muebles de baño y mobiliario a medida.',
-    bullets: ['Diseño paramétrico', 'Materiales termolaminados o lacados', 'Instalación profesional'],
-    cobertura: '📍 Bogotá · Alrededores',
+    titulo: 'Solo Carpintería',
+    sub: 'Diseñamos y fabricamos cocina, closets y muebles a la medida.',
+    bullets: [
+      'Cocina integral con mesón en cuarzo o granito',
+      'Closets de habitación y baño',
+      'Muebles auxiliares (TV, escritorio)',
+      'Termolaminados o lacados de alta gama',
+    ],
+    cobertura: 'Cotización personalizada · Bogotá',
     recomendado: false,
-    placeholder: 'Foto: Cocina + closet a medida',
+    placeholder: 'Foto: Cocina y closet a la medida (recomendado: Tramonte Living o Vértice)',
+    cta: 'Cotizar carpintería',
   },
   {
-    titulo: 'Solo acabados',
-    sub: 'Enchapes, pintura, divisiones y terminaciones de obra blanca.',
-    bullets: ['Porcelanato, cerámica, microcemento', 'Pintura técnica anti-humedad', 'Drywall y cielos rasos'],
-    cobertura: '📍 Bogotá · Soacha',
+    titulo: 'Solo Obra Blanca',
+    sub: 'Pisos, enchapes y pintura. Tú decides los muebles después.',
+    bullets: [
+      'Porcelanato, laminado o vinílico',
+      'Enchape de baños y cocina',
+      'Pintura técnica anti-humedad',
+      'Drywall y cielos rasos',
+    ],
+    cobertura: 'Cotización personalizada · Bogotá',
     recomendado: false,
-    placeholder: 'Foto: Detalle de enchapes premium',
+    placeholder: 'Foto: Detalle de enchape o piso terminado',
+    cta: 'Cotizar obra blanca',
   },
 ];
 ---
@@ -30,15 +48,15 @@ const productos = [
 <section id="productos">
   <div class="container">
     <div class="section-head reveal">
-      <span class="eyebrow">Nuestros servicios</span>
-      <h2>Tres formas de transformar tu espacio</h2>
-      <p>Diseñamos la solución que se adapta a tu proyecto, presupuesto y tiempos.</p>
+      <span class="eyebrow">ELIGE TU MODALIDAD</span>
+      <h2>Tres formas de trabajar con nosotros</h2>
+      <p>Tu apartamento, tu presupuesto, tu ritmo. Elige el paquete que se ajusta a lo que necesitas hoy.</p>
     </div>
     <div class="productos-grid">
       {productos.map((p) => (
         <article class="producto-card reveal">
           <div class="producto-img">
-            {p.recomendado && <div class="producto-badge">Recomendado</div>}
+            {p.recomendado && <div class="producto-badge">Más solicitado</div>}
             <div class="placeholder-img">{p.placeholder}</div>
           </div>
           <div class="producto-body">
@@ -48,7 +66,7 @@ const productos = [
               {p.bullets.map((b) => <li>{b}</li>)}
             </ul>
             <span class="cobertura">{p.cobertura}</span>
-            <a href="/cotiza" class="btn btn-primary">Cotizar {p.titulo.toLowerCase()} →</a>
+            <a href="/cotiza" class="btn btn-primary">{p.cta} →</a>
           </div>
         </article>
       ))}
@@ -84,8 +102,4 @@ const productos = [
   .producto-card h3 { font-size: var(--fs-h3); margin-bottom: var(--space-2); }
   .producto-card .sub { color: var(--c-text-muted); font-size: 0.95rem; margin-bottom: var(--space-4); }
   .producto-bullets { list-style: none; margin-bottom: var(--space-4); flex: 1; padding: 0; }
-  .producto-bullets li { display: flex; align-items: start; gap: var(--space-2); font-size: 0.92rem; margin-bottom: var(--space-2); color: var(--c-text-body); }
-  .producto-bullets li::before { content: "✓"; color: var(--c-verde-texto); font-weight: 700; flex-shrink: 0; }
-  .cobertura { font-size: 0.8rem; color: var(--c-text-muted); padding: var(--space-2) var(--space-3); background: rgba(170, 191, 173, 0.15); border-radius: var(--radius-sm); margin-bottom: var(--space-4); display: inline-block; }
-  .producto-card .btn { width: 100%; text-transform: capitalize; }
-</style>
+  .producto-bullets li { display: flex; align-items: start; gap: var(--space-2); font-size: 0.92rem; m

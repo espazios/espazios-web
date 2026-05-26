@@ -4,7 +4,8 @@ const proyectos = defineCollection({
   type: 'content',
   schema: ({ image }) => z.object({
     title: z.string(),
-    tipoProyecto: z.enum(['Remodelación completa', 'Carpintería', 'Solo acabados']),
+    tipoProyecto: z.enum(['Full Acabados', 'Solo Carpintería', 'Solo Obra Blanca']),
+    torre: z.string().optional(),
     subtipo: z.enum(['Cocina', 'Baño', 'Apartamento', 'Closet', 'Sala', 'Oficina', 'Local']).optional(),
     ciudad: z.string(),
     barrio: z.string().optional(),
@@ -47,4 +48,4 @@ const blog = defineCollection({
   }),
 });
 
-export const collections = { proyectos, blog };
+export const co

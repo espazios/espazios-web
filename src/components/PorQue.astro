@@ -1,23 +1,39 @@
 ---
 const pilares = [
-  { icon: '🎨', titulo: 'Diseño profesional', desc: 'Arquitectos y diseñadores propios, no plantillas genéricas.' },
-  { icon: '🧱', titulo: 'Materiales de alta calidad', desc: 'Marcas reconocidas con garantía documentada por proveedor.' },
-  { icon: '👷', titulo: 'Equipo especializado', desc: 'Maestros, técnicos y supervisión propia — sin subcontratación masiva.' },
-  { icon: '🤝', titulo: 'Acompañamiento personalizado', desc: 'Un único punto de contacto comercial durante todo tu proyecto.' },
+  {
+    icon: '💰',
+    titulo: 'Precios claros desde 15M',
+    desc: 'Cotización transparente, sin sorpresas. Te decimos el precio total antes de firmar.',
+  },
+  {
+    icon: '🎨',
+    titulo: 'Diseño 3D antes de obra',
+    desc: 'Visualizamos tu apartamento en programas profesionales antes de tocar un muro. Apruebas antes de gastar.',
+  },
+  {
+    icon: '👷',
+    titulo: 'Equipo propio',
+    desc: 'No subcontratamos. Maestros, instaladores y diseñadores son parte de Espazios.',
+  },
+  {
+    icon: '🤝',
+    titulo: 'Garantía y acompañamiento',
+    desc: 'Te acompañamos después de entregar. Resolvemos cualquier detalle. La relación no termina con las llaves.',
+  },
 ];
 ---
 
 <section class="por-que" id="por-que">
   <div class="container">
     <div class="section-head reveal">
-      <span class="eyebrow">Por qué Espazios</span>
-      <h2>Acabados con respaldo, no improvisación</h2>
-      <p>Llevamos 7 años transformando hogares y oficinas en Bogotá con un mismo equipo.</p>
+      <span class="eyebrow">POR QUÉ ESPAZIOS</span>
+      <h2>Especialistas, no improvisadores</h2>
+      <p>Llevamos años transformando apartamentos VIS en Bogotá con un mismo equipo y procesos comprobados.</p>
     </div>
     <div class="metrics reveal">
-      <div class="metric"><div class="num">80+</div><div class="lbl">Proyectos entregados</div></div>
-      <div class="metric"><div class="num">7</div><div class="lbl">Años de experiencia</div></div>
-      <div class="metric"><div class="num">98%</div><div class="lbl">Clientes nos recomiendan</div></div>
+      <div class="metric"><div class="num">80+</div><div class="lbl">Apartamentos entregados</div></div>
+      <div class="metric"><div class="num">12</div><div class="lbl">Torres VIS que conocemos</div></div>
+      <div class="metric"><div class="num">7</div><div class="lbl">Años transformando hogares</div></div>
     </div>
     <div class="pilares">
       {pilares.map(p => (
@@ -42,6 +58,4 @@ const pilares = [
   @media (min-width: 700px) { .pilares { grid-template-columns: 1fr 1fr; } }
   .pilar { display: flex; gap: var(--space-4); padding: var(--space-6); background: var(--c-bg-elev); border-radius: var(--radius-md); border: 1px solid var(--c-border); }
   .pilar-icon { flex-shrink: 0; width: 48px; height: 48px; background: rgba(118, 166, 143, 0.12); color: var(--c-verde-texto); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
-  .pilar h4 { font-size: 1.1rem; margin-bottom: var(--space-2); color: var(--c-text-strong); font-family: 'Inter', sans-serif; font-weight: 600; }
-  .pilar p { font-size: 0.9rem; color: var(--c-text-muted); }
-</style>
+  .pilar h4 { font-size: 1.

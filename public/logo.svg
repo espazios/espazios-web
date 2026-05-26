@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 200" fill="none">
+  <title>Espazios</title>
+  <!-- Monograma: casa estilizada con N diagonal -->
+  <g fill="#80BF9B">
+    <!-- Columna izquierda -->
+    <rect x="0" y="60" width="32" height="140"/>
+    <!-- Columna derecha -->
+    <rect x="138" y="60" width="32" height="140"/>
+    <!-- Diagonal superior (N) -->
+    <polygon points="0,0 32,0 170,135 170,60 138,60 32,60 32,135"/>
+    <polygon points="138,135 170,135 170,200 138,200"/>
+    <!-- Columna central pequeña -->
+    <rect x="60" y="120" width="32" height="80"/>
+  </g>
+  <!-- Wordmark "Espazios" -->
+  <text x="210" y="155"
+        font-family="'Inter', system-ui, sans-serif"
+        font-weight="300"
+        font-size="120"
+        fill="#163840"
+        letter-spacing="-2">Espazios</text>
+</svg>

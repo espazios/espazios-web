@@ -1,33 +1,37 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
-import ProductosGrid from '../components/ProductosGrid.astro';
-import ProyectosPreview from '../components/ProyectosPreview.astro';
 import Cotizador from '../components/Cotizador.astro';
+import ProductosGrid from '../components/ProductosGrid.astro';
+import Aliados from '../components/Aliados.astro';
+import ProyectosPreview from '../components/ProyectosPreview.astro';
 import ComoFunciona from '../components/ComoFunciona.astro';
 import PorQue from '../components/PorQue.astro';
+import Testimonios from '../components/Testimonios.astro';
 import BlogPreview from '../components/BlogPreview.astro';
 ---
 
 <Layout
-  title="Espazios — Acabados y Remodelación en Bogotá"
-  description="Empresa de acabados, carpintería y remodelación integral en Bogotá y Soacha. Diseño profesional, materiales premium, acompañamiento total. Cotiza online."
+  title="Espazios — Acabados de apartamentos en obra gris · Bogotá"
+  description="Especialistas en remodelación de apartamentos en obra gris en Bogotá. Full acabados, solo carpintería o solo obra blanca. Desde 15 millones."
   activeNav="home"
 >
   <Hero />
-  <ProductosGrid />
-  <ProyectosPreview />
   <Cotizador />
+  <ProductosGrid />
+  <Aliados />
+  <ProyectosPreview />
   <ComoFunciona />
   <PorQue />
+  <Testimonios />
   <BlogPreview />
 
   <section class="cta-final" id="contacto">
     <div class="container">
       <div class="reveal">
-        <h2>¿Listo para transformar tu espacio?</h2>
-        <p>Recibe tu cotización personalizada en menos de 24 horas hábiles.</p>
-        <a href="/cotiza" class="btn btn-primary btn-large" style="background: var(--c-verde-claro); color: var(--c-azul-profundo);">Cotiza tu proyecto →</a>
+        <h2>¿Listo para terminar tu apartamento?</h2>
+        <p>Cotización transparente en menos de 24 horas hábiles. Sin compromiso.</p>
+        <a href="#cotizador" class="btn btn-primary btn-large" style="background: var(--c-verde-claro); color: var(--c-azul-profundo);">Cotizar ahora →</a>
       </div>
     </div>
   </section>

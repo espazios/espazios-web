@@ -7,15 +7,17 @@ const { activeNav } = Astro.props;
 const links = [
   { href: '/#productos', label: 'Servicios', key: 'servicios' },
   { href: '/proyectos', label: 'Proyectos', key: 'proyectos' },
-  { href: '/cotiza', label: 'Cotizar', key: 'cotizador' },
+  { href: '/#cotizador', label: 'Cotizar', key: 'cotizador' },
   { href: '/blog', label: 'Blog', key: 'blog' },
   { href: '/#contacto', label: 'Contacto', key: 'contacto' },
 ];
 ---
 
-<nav class="navbar">
+<nav class="navbar" aria-label="Navegación principal">
   <div class="nav-inner">
-    <a href="/" class="logo-placeholder" aria-label="Espazios - Inicio">esp<span>azios</span></a>
+    <a href="/" class="nav-logo" aria-label="Espazios — Inicio">
+      <img src="/logo.svg" alt="Espazios" width="160" height="44" />
+    </a>
 
     <ul class="nav-links">
       {links.map((link) => (
@@ -25,7 +27,7 @@ const links = [
       ))}
     </ul>
 
-    <a href="/cotiza" class="btn btn-primary nav-cta">Cotizar →</a>
+    <a href="/#cotizador" class="btn btn-primary nav-cta">Cotizar →</a>
 
     <button
       class="menu-toggle"
@@ -42,32 +44,31 @@ const links = [
 <style>
   .navbar {
     position: sticky; top: 0; z-index: 100;
-    background: rgba(250, 251, 250, 0.85);
+    background: rgba(250, 251, 250, 0.88);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--c-border);
   }
   .nav-inner {
     display: flex; align-items: center; justify-content: space-between;
-    padding: var(--space-4) var(--space-6);
+    padding: var(--space-3) var(--space-6);
     max-width: 1280px; margin: 0 auto;
     gap: var(--space-4);
   }
-  .logo-placeholder {
-    width: 160px; height: 44px; flex-shrink: 0;
-    background: linear-gradient(135deg, var(--c-azul-profundo), var(--c-azul-pizarra));
-    border-radius: var(--radius-sm);
-    display: flex; align-items: center; justify-content: center;
-    color: #fff; font-family: 'Fraunces', serif;
-    font-size: 1.1rem; font-weight: 500;
-    letter-spacing: -0.02em;
+  .nav-logo {
+    flex-shrink: 0;
+    display: flex; align-items: center;
     text-decoration: none;
+    min-height: 44px;
   }
-  .logo-placeholder span { color: var(--c-verde-claro); }
-
-  .nav-links {
-    display: none; gap: var(--space-8); list-style: none;
+  .nav-logo img {
+    height: 34px; width: auto;
+    display: block;
   }
+  @media (min-width: 900px) {
+    .nav-logo img { height: 40px; }
+  }
+  .nav-links { display: none; gap: var(--space-8); list-style: none; }
   @media (min-width: 900px) { .nav-links { display: flex; } }
   .nav-links a {
     color: var(--c-text-body); text-decoration: none;
@@ -75,12 +76,8 @@ const links = [
     transition: color var(--t-fast);
   }
   .nav-links a:hover, .nav-links a.active { color: var(--c-verde-texto); }
-
-  /* CTA navbar oculto en mobile */
   .nav-cta { padding: 10px 20px; min-height: 44px; display: none; }
   @media (min-width: 900px) { .nav-cta { display: inline-flex; } }
-
-  /* Botón hamburguesa */
   .menu-toggle {
     display: flex; flex-direction: column; justify-content: center;
     width: 44px; height: 44px;
@@ -91,9 +88,10 @@ const links = [
   .menu-toggle span {
     display: block; width: 22px; height: 2px;
     background: var(--c-text-strong); border-radius: 2px;
-    transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1), opacity 200ms;
+    transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1), opacity 200ms, background 200ms;
     margin: 0 auto;
   }
+  .menu-toggle[aria-expanded="true"] span { background: #fff; }
   .menu-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
   .menu-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
   .menu-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }

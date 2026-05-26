@@ -9,13 +9,16 @@
   --c-verde-neutro: #AABFAD;
   /* Variante accesible (WCAG AA) para verde como texto */
   --c-verde-texto: #3F6B57;
-  /* Neutros */
-  --c-bg: #FAFBFA;
+  /* Neutros (verde claro dominante en fondos) */
+  --c-bg: #F2F7F2;
   --c-bg-elev: #FFFFFF;
+  --c-bg-soft: #E8F0EA;
+  --c-bg-verde-claro: rgba(128, 191, 155, 0.10);
   --c-text-strong: #163840;
   --c-text-body: #2F4750;
   --c-text-muted: #5A6D75;
-  --c-border: #E4ECE7;
+  --c-border: #DCE7DE;
+  --c-border-strong: #C1D5C6;
   --c-error: #B85C3A;
 
   /* Tipografía fluida */
@@ -104,6 +107,29 @@ section { padding: var(--space-16) 0; }
 .btn-ghost:hover { color: var(--c-azul-profundo); }
 .btn-large { padding: 18px 36px; min-height: 60px; font-size: 1.05rem; }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+
+/* === Focus visible (accesibilidad - Nielsen #7) === */
+:focus-visible {
+  outline: 3px solid var(--c-verde-claro);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+.btn:focus-visible {
+  outline: 3px solid var(--c-verde-claro);
+  outline-offset: 3px;
+}
+
+/* === Skip to content (accesibilidad teclado) === */
+.skip-to-content {
+  position: absolute; left: -9999px;
+  background: var(--c-azul-profundo); color: #fff;
+  padding: 12px 20px; border-radius: var(--radius-sm);
+  text-decoration: none; font-weight: 600;
+  z-index: 200;
+}
+.skip-to-content:focus {
+  left: var(--space-4); top: var(--space-4);
+}
 
 /* === Reveal animation === */
 .reveal { opacity: 0; transform: translateY(24px); transition: opacity 600ms, transform 600ms cubic-bezier(0.22, 1, 0.36, 1); }

@@ -11,7 +11,7 @@ const productos = [
     ],
     cobertura: 'Desde 15 millones · Bogotá',
     recomendado: true,
-    placeholder: 'Foto: Cocina + sala terminadas (recomendado: Centrik Park, Nova Tramonte o Sabantti)',
+    placeholder: 'Foto: Apartamento terminado (Centrik Park / Nova Tramonte)',
     cta: 'Cotizar full acabados',
   },
   {
@@ -25,7 +25,7 @@ const productos = [
     ],
     cobertura: 'Cotización personalizada · Bogotá',
     recomendado: false,
-    placeholder: 'Foto: Cocina y closet a la medida (recomendado: Tramonte Living o Vértice)',
+    placeholder: 'Foto: Cocina y closet a la medida',
     cta: 'Cotizar carpintería',
   },
   {
@@ -66,7 +66,7 @@ const productos = [
               {p.bullets.map((b) => <li>{b}</li>)}
             </ul>
             <span class="cobertura">{p.cobertura}</span>
-            <a href="/cotiza" class="btn btn-primary">{p.cta} →</a>
+            <a href="#cotizador" class="btn btn-primary">{p.cta} →</a>
           </div>
         </article>
       ))}
@@ -88,7 +88,7 @@ const productos = [
   .placeholder-img {
     width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
     background: linear-gradient(135deg, var(--c-verde-neutro), var(--c-verde-salvia));
-    color: rgba(255,255,255,0.85); font-family: 'Fraunces', serif; font-style: italic;
+    color: rgba(255,255,255,0.92); font-family: 'Fraunces', serif; font-style: italic;
     font-size: 0.85rem; padding: var(--space-4); text-align: center;
   }
   .producto-badge {
@@ -102,4 +102,8 @@ const productos = [
   .producto-card h3 { font-size: var(--fs-h3); margin-bottom: var(--space-2); }
   .producto-card .sub { color: var(--c-text-muted); font-size: 0.95rem; margin-bottom: var(--space-4); }
   .producto-bullets { list-style: none; margin-bottom: var(--space-4); flex: 1; padding: 0; }
-  .producto-bullets li { display: flex; align-items: start; gap: var(--space-2); font-size: 0.92rem; m
+  .producto-bullets li { display: flex; align-items: start; gap: var(--space-2); font-size: 0.92rem; margin-bottom: var(--space-2); color: var(--c-text-body); }
+  .producto-bullets li::before { content: "✓"; color: var(--c-verde-texto); font-weight: 700; flex-shrink: 0; }
+  .cobertura { font-size: 0.8rem; color: var(--c-text-muted); padding: var(--space-2) var(--space-3); background: rgba(170, 191, 173, 0.18); border-radius: var(--radius-sm); margin-bottom: var(--space-4); display: inline-block; }
+  .producto-card .btn { width: 100%; }
+</style>

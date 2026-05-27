@@ -6,7 +6,7 @@ subtipo: Cocina
 ciudad: Bogotá
 descripcionCorta: Cocina integral con isla central, mesón en cuarzo y closets a
   la medida para apartamento en Centrik Park.
-fotoPortada: https://www.tiktok.com/@espazios/video/7640846394776898824
+fotoPortada: /uploads/apto15.webp
 duracionSemanas: 4
 rangoPresupuesto: $12M-$16M
 destacado: true

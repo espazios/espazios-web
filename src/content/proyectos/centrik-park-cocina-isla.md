@@ -1,19 +1,28 @@
 ---
-title: "Centrik Park — Cocina con isla central"
-tipoProyecto: "Solo Carpintería"
-subtipo: "Cocina"
-torre: "Centrik Park"
-ciudad: "Bogotá"
-descripcionCorta: "Cocina integral con isla central, mesón en cuarzo y closets a la medida para apartamento en Centrik Park."
+title: Centrik Park — Cocina con isla central
+tipoProyecto: Solo Carpintería
+torre: Centrik Park
+subtipo: Cocina
+ciudad: Bogotá
+descripcionCorta: Cocina integral con isla central, mesón en cuarzo y closets a
+  la medida para apartamento en Centrik Park.
+fotoPortada: https://www.tiktok.com/@espazios/video/7640846394776898824
 duracionSemanas: 4
-rangoPresupuesto: "$12M-$16M"
+rangoPresupuesto: $12M-$16M
 destacado: true
 fechaEntrega: 2025-08-15
-etiquetas: ["centrik-park", "cocina", "carpinteria", "isla"]
+etiquetas:
+  - centrik-park
+  - cocina
+  - carpinteria
+  - isla
 tieneVideo: true
-videoPlataforma: "TikTok"
-seoTitle: "Cocina integral con isla en Centrik Park — Espazios Bogotá"
-seoDescription: "Cocina integral a la medida con isla central en Centrik Park, Bogotá. Termolaminados premium, mesón en cuarzo. Diseño y fabricación profesional."
+videoPlataforma: TikTok
+seoTitle: Cocina integral con isla en Centrik Park — Espazios Bogotá
+seoDescription: Cocina integral a la medida con isla central en Centrik Park,
+  Bogotá. Termolaminados premium, mesón en cuarzo. Diseño y fabricación
+  profesional.
+draft: true
 ---
 
 ## Cocina con isla para apartamento en Centrik Park

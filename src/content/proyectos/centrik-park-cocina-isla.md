@@ -17,6 +17,7 @@ etiquetas:
   - carpinteria
   - isla
 tieneVideo: true
+videoUrl: https://www.tiktok.com/@espazios/video/7640846394776898824
 videoPlataforma: TikTok
 seoTitle: Cocina integral con isla en Centrik Park — Espazios Bogotá
 seoDescription: Cocina integral a la medida con isla central en Centrik Park,

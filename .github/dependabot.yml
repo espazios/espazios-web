@@ -11,24 +11,35 @@ updates:
       day: "monday"
       time: "09:00"
       timezone: "America/Bogota"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 3
     commit-message:
       prefix: "chore(deps)"
       include: "scope"
     labels:
       - "dependencies"
-    # Agrupar actualizaciones menores y de patch en un solo PR
+    # IMPORTANTE: solo patch y minor automaticamente.
+    # Los major se revisan a mano (suelen tener breaking changes).
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    # Agrupar updates relacionadas en un solo PR
     groups:
       astro-ecosystem:
         patterns:
           - "astro"
           - "@astrojs/*"
+        update-types:
+          - "minor"
+          - "patch"
       dev-tools:
         patterns:
           - "@types/*"
           - "typescript"
           - "vitest*"
           - "@playwright/*"
+        update-types:
+          - "minor"
+          - "patch"
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
@@ -39,3 +50,6 @@ updates:
       prefix: "chore(ci)"
     labels:
       - "ci"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]

@@ -6,6 +6,7 @@ subtipo: Cocina
 ciudad: Bogotá
 descripcionCorta: Cocina integral con isla central, mesón en cuarzo y closets a
   la medida para apartamento en Centrik Park.
+fotoPortada: /uploads/apto15.webp
 duracionSemanas: 4
 rangoPresupuesto: $12M-$16M
 destacado: true
@@ -16,7 +17,7 @@ etiquetas:
   - carpinteria
   - isla
 tieneVideo: true
-videoUrl: https://www.tiktok.com/@espazios/video/7640846394776898824
+videoUrl: https://www.tiktok.com/@espazios/video/7643486276007562503
 videoPlataforma: TikTok
 seoTitle: Cocina integral con isla en Centrik Park — Espazios Bogotá
 seoDescription: Cocina integral a la medida con isla central en Centrik Park,

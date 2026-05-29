@@ -1,19 +1,28 @@
 ---
-title: "Sabantti — Cocina y closets a la medida"
-tipoProyecto: "Solo Carpintería"
-subtipo: "Cocina"
-torre: "Sabantti"
-ciudad: "Bogotá"
-descripcionCorta: "Carpintería completa para apartamento en Sabantti: cocina integral con barra, closets de dos habitaciones y mueble auxiliar."
+title: Sabantti — Cocina y closets a la medida
+tipoProyecto: Solo Carpintería
+torre: Sabantti
+subtipo: Cocina
+ciudad: Bogotá
+descripcionCorta: "Carpintería completa para apartamento en Sabantti: cocina
+  integral con barra, closets de dos habitaciones y mueble auxiliar."
+fotoPortada: /uploads/apto15.webp
 duracionSemanas: 5
-rangoPresupuesto: "$15M-$20M"
+rangoPresupuesto: $15M-$20M
 destacado: true
 fechaEntrega: 2025-09-10
-etiquetas: ["sabantti", "carpinteria", "cocina", "closets"]
+etiquetas:
+  - sabantti
+  - carpinteria
+  - cocina
+  - closets
 tieneVideo: true
-videoPlataforma: "TikTok"
+videoUrl: https://www.tiktok.com/@espazios/video/7632784791204646151
+videoPlataforma: TikTok
 seoTitle: "Carpintería Sabantti: cocina + closets — Espazios Bogotá"
-seoDescription: "Cocina integral, closets a la medida y muebles auxiliares para apartamento en Sabantti, Bogotá. Carpintería con termolaminados premium."
+seoDescription: Cocina integral, closets a la medida y muebles auxiliares para
+  apartamento en Sabantti, Bogotá. Carpintería con termolaminados premium.
+draft: true
 ---
 
 ## Sabantti: la carpintería que cambia el apartamento

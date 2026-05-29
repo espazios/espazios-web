@@ -1,0 +1,39 @@
+# CI básico — verifica que el build pase ANTES de mergear a main.
+# Esto habría prevenido el desastre de Decap del 27-may.
+name: CI · Build & Type Check
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build Astro site
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Astro check (TypeScript + content collections)
+        run: npx astro check
+        continue-on-error: true
+
+      - name: Build
+        run: npm run build
+        env:
+          HUBSPOT_PRIVATE_APP_TOKEN: mock_token_for_ci
+          HUBSPOT_PORTAL_ID: '0'
+          PUBLIC_SITE_URL: https://www.espazios.com.co

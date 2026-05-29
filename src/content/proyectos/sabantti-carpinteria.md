@@ -22,7 +22,7 @@ videoPlataforma: TikTok
 seoTitle: "Carpintería Sabantti: cocina + closets — Espazios Bogotá"
 seoDescription: Cocina integral, closets a la medida y muebles auxiliares para
   apartamento en Sabantti, Bogotá. Carpintería con termolaminados premium.
-draft: true
+draft: false
 ---
 
 ## Sabantti: la carpintería que cambia el apartamento

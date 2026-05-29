@@ -1,0 +1,32 @@
+{
+  "ci": {
+    "collect": {
+      "url": [
+        "https://espazios-web-git-main-espazios-8361s-projects.vercel.app",
+        "https://espazios-web-git-main-espazios-8361s-projects.vercel.app/proyectos",
+        "https://espazios-web-git-main-espazios-8361s-projects.vercel.app/blog"
+      ],
+      "numberOfRuns": 1,
+      "settings": {
+        "preset": "desktop"
+      }
+    },
+    "assert": {
+      "preset": "lighthouse:recommended",
+      "assertions": {
+        "categories:performance": ["warn", { "minScore": 0.80 }],
+        "categories:accessibility": ["error", { "minScore": 0.90 }],
+        "categories:best-practices": ["warn", { "minScore": 0.85 }],
+        "categories:seo": ["warn", { "minScore": 0.90 }],
+        "unused-javascript": "off",
+        "uses-text-compression": "off",
+        "uses-long-cache-ttl": "off",
+        "csp-xss": "off",
+        "is-on-https": "off"
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}

@@ -2,7 +2,7 @@ import { defineCollection, z } from 'astro:content';
 
 const proyectos = defineCollection({
   type: 'content',
-  schema: ({ image }) => z.object({
+  schema: z.object({
     title: z.string(),
     tipoProyecto: z.enum(['Full Acabados', 'Solo Carpintería', 'Solo Obra Blanca']),
     torre: z.string().optional(),
@@ -10,10 +10,11 @@ const proyectos = defineCollection({
     ciudad: z.string(),
     barrio: z.string().optional(),
     descripcionCorta: z.string(),
-    fotoPortada: image().optional(),
-    fotoAntes: image().optional(),
-    fotoDespues: image().optional(),
-    galeria: z.array(image()).optional(),
+    // Imágenes como strings (paths/URLs) para compatibilidad con Decap CMS.
+    fotoPortada: z.string().optional(),
+    fotoAntes: z.string().optional(),
+    fotoDespues: z.string().optional(),
+    galeria: z.array(z.string()).optional(),
     duracionSemanas: z.number().optional(),
     rangoPresupuesto: z.string().optional(),
     destacado: z.boolean().default(false),
@@ -32,7 +33,7 @@ const proyectos = defineCollection({
 
 const blog = defineCollection({
   type: 'content',
-  schema: ({ image }) => z.object({
+  schema: z.object({
     title: z.string(),
     excerpt: z.string(),
     categoria: z.enum(['Remodelación', 'Carpintería', 'Acabados', 'Guías y Consejos']),
@@ -40,7 +41,7 @@ const blog = defineCollection({
     autor: z.string().default('Equipo Espazios'),
     fechaPublicacion: z.date(),
     fechaActualizacion: z.date().optional(),
-    imagenDestacada: image().optional(),
+    imagenDestacada: z.string().optional(),
     minutosLectura: z.number().optional(),
     seoTitle: z.string().optional(),
     seoDescription: z.string().optional(),

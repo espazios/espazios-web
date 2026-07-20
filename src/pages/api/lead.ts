@@ -11,11 +11,11 @@
  *   HUBSPOT_PORTAL_ID (opcional, para logs)
  */
 import type { APIRoute } from 'astro';
-
+ 
 export const prerender = false; // Server endpoint
-
+ 
 const HS_BASE = 'https://api.hubapi.com';
-
+ 
 // ===== Sanitización =====
 function sanitize(input: unknown, type: 'text' | 'email' | 'phone' | 'name' = 'text', maxLen = 500): string {
   if (input == null) return '';
@@ -27,14 +27,14 @@ function sanitize(input: unknown, type: 'text' | 'email' | 'phone' | 'name' = 't
   if (type === 'name') s = s.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'.\-]/g, '');
   return s;
 }
-
+ 
 // ===== Mapeo a propiedades HubSpot =====
 function mapToHubSpotProps(payload: Record<string, unknown>): Record<string, string> {
   const nombre = sanitize(payload.nombre, 'name', 100);
   const partes = nombre.split(/\s+/);
   const firstname = partes[0] || '';
   const lastname = partes.slice(1).join(' ') || '';
-
+ 
   const props: Record<string, string> = {};
   if (payload.email) props.email = sanitize(payload.email, 'email', 150);
   if (firstname) props.firstname = firstname;
@@ -46,7 +46,7 @@ function mapToHubSpotProps(payload: Record<string, unknown>): Record<string, str
   if (payload.presupuesto) props.rango_presupuesto = sanitize(payload.presupuesto, 'text', 50);
   return props;
 }
-
+ 
 // ===== HubSpot Upsert =====
 async function upsertContact(token: string, props: Record<string, string>) {
   if (!props.email) throw new Error('email es requerido para upsert');
@@ -54,7 +54,7 @@ async function upsertContact(token: string, props: Record<string, string>) {
     Authorization: `Bearer ${token}`,
     'Content-Type': 'application/json',
   };
-
+ 
   // 1) Buscar
   const searchRes = await fetch(`${HS_BASE}/crm/v3/objects/contacts/search`, {
     method: 'POST',
@@ -70,7 +70,7 @@ async function upsertContact(token: string, props: Record<string, string>) {
     throw new Error(`HubSpot search failed ${searchRes.status}: ${errText.slice(0, 200)}`);
   }
   const search = await searchRes.json();
-
+ 
   // 2) Update o Create
   if (search.results && search.results.length > 0) {
     const id = search.results[0].id;
@@ -91,12 +91,12 @@ async function upsertContact(token: string, props: Record<string, string>) {
     return await r.json();
   }
 }
-
+ 
 // ===== Rate limit en memoria (sesión Vercel) =====
 const requestLog = new Map<string, number[]>();
 const WINDOW_MS = 10 * 60 * 1000; // 10 min
 const MAX_REQUESTS = 10;
-
+ 
 function rateLimitCheck(ip: string): { allowed: boolean; retryAfter?: number } {
   const now = Date.now();
   const list = requestLog.get(ip) || [];
@@ -108,7 +108,7 @@ function rateLimitCheck(ip: string): { allowed: boolean; retryAfter?: number } {
   requestLog.set(ip, recent);
   return { allowed: true };
 }
-
+ 
 // ===== HANDLER =====
 export const POST: APIRoute = async ({ request, clientAddress }) => {
   try {
@@ -119,7 +119,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
         headers: { 'Content-Type': 'application/json' },
       });
     }
-
+ 
     const ip = clientAddress || 'unknown';
     const rl = rateLimitCheck(ip);
     if (!rl.allowed) {
@@ -128,7 +128,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
         { status: 429, headers: { 'Content-Type': 'application/json' } }
       );
     }
-
+ 
     const payload = await request.json();
     const { leadId, etapa, fields } = payload || {};
     if (!leadId || !fields) {
@@ -137,7 +137,17 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
         headers: { 'Content-Type': 'application/json' },
       });
     }
-
+ 
+    // HONEYPOT anti-bots: si el campo "website" viene lleno, fingimos éxito silencioso.
+    // Los humanos nunca ven este campo (visualmente oculto), los bots que llenan todo caen.
+    if (fields.website) {
+      console.warn('[api/lead] honeypot triggered from IP', ip);
+      return new Response(
+        JSON.stringify({ ok: true, hubspotSynced: false, reason: 'honeypot' }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+ 
     // Solo sync a HubSpot si hay email
     if (!fields.email) {
       return new Response(
@@ -145,10 +155,18 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
         { status: 200, headers: { 'Content-Type': 'application/json' } }
       );
     }
-
+ 
+    // HABEAS DATA: requerido antes de sincronizar a HubSpot (Ley 1581/2012 CO)
+    if (!fields.consentimientoHabeasData) {
+      return new Response(
+        JSON.stringify({ ok: false, error: 'consent_required', message: 'Debes aceptar la política de datos.' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+ 
     const hsProps = mapToHubSpotProps(fields);
     const result = await upsertContact(token, hsProps);
-
+ 
     return new Response(
       JSON.stringify({ ok: true, hubspotId: result.id, hubspotSynced: true }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
@@ -161,7 +179,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
     );
   }
 };
-
+ 
 // Health check
 export const GET: APIRoute = async () => {
   const hasToken = !!import.meta.env.HUBSPOT_PRIVATE_APP_TOKEN;
@@ -170,3 +188,4 @@ export const GET: APIRoute = async () => {
     { status: 200, headers: { 'Content-Type': 'application/json' } }
   );
 };
+ 

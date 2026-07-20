@@ -1,7 +1,7 @@
 ---
 const calendarUrl = import.meta.env.GOOGLE_CALENDAR_URL || 'https://calendar.google.com/calendar/appointments/schedules/AcZssZ2JoOnboCFBDmNXuAjfh7hXLnAO2dqw9dMteg9N1iZLpHxoVL0ODnFWU2zIrfQN9vOKKxPyaQMT';
 ---
-
+ 
 <section id="cotizador" class="cotizador">
   <div class="container">
     <div class="section-head reveal">
@@ -9,15 +9,15 @@ const calendarUrl = import.meta.env.GOOGLE_CALENDAR_URL || 'https://calendar.goo
       <h2>Tu cotización en 3 minutos</h2>
       <p>Te hacemos 6 preguntas rápidas y nuestro equipo te contacta con propuesta personalizada.</p>
     </div>
-
+ 
     <div class="cotizador-card reveal">
       <div class="save-indicator" id="saveIndicator">Guardado ✓</div>
-
+ 
       <div class="progress-row">
         <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
         <span class="progress-label"><span id="stepNum">1</span> de 6</span>
       </div>
-
+ 
       <div class="step active" data-step="1">
         <div class="isa-bubble">
           <div class="isa-avatar">I</div>
@@ -28,30 +28,47 @@ const calendarUrl = import.meta.env.GOOGLE_CALENDAR_URL || 'https://calendar.goo
         <div class="field"><label>Nombre completo</label><input type="text" id="inpNombre" placeholder="Ej: María Camila Pérez" autocomplete="name" /></div>
         <div class="field"><label>Correo electrónico</label><input type="email" id="inpEmail" placeholder="tu@email.com" autocomplete="email" inputmode="email" /></div>
         <div class="field"><label>Número celular</label><input type="tel" id="inpCelular" placeholder="3xx xxx xxxx" autocomplete="tel" inputmode="tel" /></div>
+ 
+        <!-- Honeypot: invisible para humanos, visible para bots que llenan todo -->
+        <div class="hp-field" aria-hidden="true">
+          <label for="inpWebsite">No llenar este campo</label>
+          <input type="text" id="inpWebsite" name="website" tabindex="-1" autocomplete="off" />
+        </div>
+ 
+        <!-- Habeas Data — Ley 1581/2012 Colombia -->
+        <label class="hd-check">
+          <input type="checkbox" id="inpConsentimiento" />
+          <span>
+            Acepto la <a href="/politica-privacidad" target="_blank" rel="noopener">Política de Tratamiento de Datos</a>
+            y autorizo a Espazios a usar mi información para contactarme sobre esta cotización.
+            <em>(Ley 1581 de 2012 · Colombia)</em>
+          </span>
+        </label>
+ 
         <div class="btn-row"><button class="btn btn-primary" id="btnPaso1" disabled>Continuar →</button></div>
       </div>
-
+ 
       <div class="step" data-step="2">
         <h3>Cuéntanos sobre tu proyecto</h3>
         <p class="pregunta">¿Qué tipo de remodelación quieres realizar?</p>
         <div class="opciones">
-          <button class="opcion" data-tipo="Remodelación completa">
+          <button class="opcion" data-tipo="Full Acabados">
             <span class="opcion-recomendado">Recomendado</span>
-            <div class="opcion-titulo">Remodelación completa</div>
-            <div class="opcion-desc">Incluye acabados y carpintería.</div>
+            <div class="opcion-titulo">Full Acabados</div>
+            <div class="opcion-desc">Paquete completo: pisos, enchape, cocina y carpintería.</div>
           </button>
-          <button class="opcion" data-tipo="Carpintería">
-            <div class="opcion-titulo">Carpintería</div>
+          <button class="opcion" data-tipo="Solo Carpintería">
+            <div class="opcion-titulo">Solo Carpintería</div>
             <div class="opcion-desc">Cocina, closets, puertas, muebles baño y mobiliario.</div>
           </button>
-          <button class="opcion" data-tipo="Solo acabados">
-            <div class="opcion-titulo">Solo acabados</div>
+          <button class="opcion" data-tipo="Solo Obra Blanca">
+            <div class="opcion-titulo">Solo Obra Blanca</div>
             <div class="opcion-desc">Enchapes, pintura, divisiones y terminaciones.</div>
           </button>
         </div>
         <div class="btn-row"><button class="btn btn-ghost" data-back>← Volver</button></div>
       </div>
-
+ 
       <div class="step" data-step="3">
         <h3>¿Dónde está ubicado tu inmueble?</h3>
         <p class="pregunta">Esto nos ayuda a confirmar cobertura.</p>
@@ -60,22 +77,22 @@ const calendarUrl = import.meta.env.GOOGLE_CALENDAR_URL || 'https://calendar.goo
           <button class="opcion" data-ciudad="Soacha"><div class="opcion-titulo">Soacha</div><div class="opcion-desc">Selecciona si queda dentro de Soacha.</div></button>
           <button class="opcion" data-ciudad="Alrededores Bogotá"><div class="opcion-titulo">Alrededores de Bogotá</div><div class="opcion-desc">Mosquera, Madrid, Chía, Cota, Zipaquirá, Cajicá, La Calera.</div></button>
         </div>
-        <div class="field" style="margin-top: var(--space-6);"><label>Barrio o conjunto residencial (opcional)</label><input type="text" id="inpBarrio" placeholder="Ej: Cedritos, Salitre, Edificio Aurora" /></div>
+        <div class="field" style="margin-top: var(--space-6);"><label>Torre / conjunto / barrio (opcional)</label><input type="text" id="inpBarrio" placeholder="Ej: Centrik Park, Nova Tramonte, Cedritos" /></div>
         <div class="btn-row"><button class="btn btn-ghost" data-back>← Volver</button><button class="btn btn-primary" id="btnPaso3" disabled>Continuar →</button></div>
       </div>
-
+ 
       <div class="step" data-step="4">
         <h3>¿Cuál es tu presupuesto aproximado?</h3>
         <p class="pregunta">Esto es solo una referencia para entender la escala del proyecto.</p>
         <div class="opciones">
-          <button class="opcion" data-presupuesto="Menos de $5 millones"><div class="opcion-titulo">Menos de $5 millones</div></button>
-          <button class="opcion" data-presupuesto="Entre $5 y $15 millones"><div class="opcion-titulo">Entre $5 y $15 millones</div></button>
-          <button class="opcion" data-presupuesto="Entre $15 y $30 millones"><div class="opcion-titulo">Entre $15 y $30 millones</div></button>
-          <button class="opcion" data-presupuesto="Más de $30 millones"><div class="opcion-titulo">Más de $30 millones</div></button>
+          <button class="opcion" data-presupuesto="Menos de $15 millones"><div class="opcion-titulo">Menos de $15 millones</div></button>
+          <button class="opcion" data-presupuesto="Entre $15 y $25 millones"><div class="opcion-titulo">Entre $15 y $25 millones</div></button>
+          <button class="opcion" data-presupuesto="Entre $25 y $40 millones"><div class="opcion-titulo">Entre $25 y $40 millones</div></button>
+          <button class="opcion" data-presupuesto="Más de $40 millones"><div class="opcion-titulo">Más de $40 millones</div></button>
         </div>
         <div class="btn-row"><button class="btn btn-ghost" data-back>← Volver</button></div>
       </div>
-
+ 
       <div class="step" data-step="5">
         <h3>¿Cuándo te gustaría comenzar?</h3>
         <p class="pregunta">Para coordinar agenda y disponibilidad de equipo.</p>
@@ -88,7 +105,7 @@ const calendarUrl = import.meta.env.GOOGLE_CALENDAR_URL || 'https://calendar.goo
         </div>
         <div class="btn-row"><button class="btn btn-ghost" data-back>← Volver</button></div>
       </div>
-
+ 
       <div class="step" data-step="6">
         <div class="isa-bubble"><div class="isa-avatar">I</div><div class="text">Estamos cerca. <strong>Falta poco para tu cotización.</strong></div></div>
         <h3>Agenda una asesoría personalizada</h3>
@@ -103,7 +120,7 @@ const calendarUrl = import.meta.env.GOOGLE_CALENDAR_URL || 'https://calendar.goo
           <button class="btn btn-ghost" id="btnLlamenme">Prefiero que me llamen</button>
         </div>
       </div>
-
+ 
       <div class="step" data-step="success">
         <div class="success-card">
           <div class="check">✓</div>
@@ -117,7 +134,7 @@ const calendarUrl = import.meta.env.GOOGLE_CALENDAR_URL || 'https://calendar.goo
     </div>
   </div>
 </section>
-
+ 
 <style>
   .cotizador {
     background: linear-gradient(180deg, var(--c-azul-profundo) 0%, #0d2429 100%);
@@ -130,7 +147,7 @@ const calendarUrl = import.meta.env.GOOGLE_CALENDAR_URL || 'https://calendar.goo
   }
   .cotizador :global(h2), .cotizador :global(h3) { color: #fff; }
   .cotizador .section-head p { color: rgba(255,255,255,0.7); }
-
+ 
   .cotizador-card {
     max-width: 680px; margin: 0 auto;
     background: rgba(255,255,255,0.04);
@@ -141,59 +158,108 @@ const calendarUrl = import.meta.env.GOOGLE_CALENDAR_URL || 'https://calendar.goo
     position: relative; z-index: 1;
   }
   @media (min-width: 768px) { .cotizador-card { padding: var(--space-12); } }
-
+ 
   .progress-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-8); }
   .progress-track { flex: 1; height: 4px; background: rgba(255,255,255,0.12); border-radius: var(--radius-pill); overflow: hidden; }
   .progress-fill { height: 100%; background: linear-gradient(90deg, var(--c-verde-salvia), var(--c-verde-claro)); border-radius: var(--radius-pill); transition: width 500ms ease; width: 16.66%; }
   .progress-label { font-size: var(--fs-small); color: rgba(255,255,255,0.7); font-variant-numeric: tabular-nums; margin-left: var(--space-4); }
-
+ 
   .isa-bubble { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-6); }
   .isa-avatar { width: 48px; height: 48px; flex-shrink: 0; background: var(--c-verde-neutro); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fraunces', serif; color: var(--c-azul-profundo); font-weight: 600; font-size: 1.1rem; }
   .isa-bubble .text { font-size: 0.95rem; color: rgba(255,255,255,0.85); }
   .isa-bubble .text strong { color: #fff; font-weight: 500; }
-
+ 
   .step { display: none; animation: fadeUp 400ms cubic-bezier(0.22, 1, 0.36, 1); }
   .step.active { display: block; }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
   .step h3 { font-size: 1.6rem; margin-bottom: var(--space-3); font-family: 'Fraunces', serif; }
   .step .pregunta { color: rgba(255,255,255,0.7); margin-bottom: var(--space-6); font-size: 1rem; }
-
+ 
   .field { margin-bottom: var(--space-4); }
   .field label { display: block; font-size: 0.85rem; color: rgba(255,255,255,0.7); margin-bottom: var(--space-2); font-weight: 500; }
   .field input { width: 100%; padding: 14px var(--space-4); background: rgba(255,255,255,0.08); color: #fff; border: 1.5px solid rgba(255,255,255,0.12); border-radius: var(--radius-md); font-size: 1rem; transition: border-color var(--t-fast), background var(--t-fast); font-family: inherit; }
   .field input:focus { outline: none; border-color: var(--c-verde-claro); background: rgba(255,255,255,0.12); }
   .field input::placeholder { color: rgba(255,255,255,0.4); }
-
+ 
+  /* Honeypot: invisible pero presente en DOM para bots */
+  .hp-field {
+    position: absolute !important;
+    left: -9999px !important;
+    top: -9999px !important;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+ 
+  /* Habeas Data — checkbox de consentimiento */
+  .hd-check {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: var(--radius-md);
+    margin: var(--space-4) 0 var(--space-6);
+    cursor: pointer;
+    transition: background var(--t-fast), border-color var(--t-fast);
+  }
+  .hd-check:hover { background: rgba(255,255,255,0.08); border-color: rgba(128,191,155,0.4); }
+  .hd-check input[type="checkbox"] {
+    width: 20px; height: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    cursor: pointer;
+    accent-color: var(--c-verde-claro);
+  }
+  .hd-check span {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.85);
+    line-height: 1.5;
+  }
+  .hd-check a {
+    color: var(--c-verde-claro);
+    text-decoration: underline;
+  }
+  .hd-check em {
+    font-style: italic;
+    color: rgba(255,255,255,0.5);
+    font-size: 0.78rem;
+    display: block;
+    margin-top: 4px;
+  }
+ 
   .opciones { display: grid; grid-template-columns: 1fr; gap: var(--space-3); }
   @media (min-width: 600px) { .opciones.cols-3 { grid-template-columns: repeat(3, 1fr); } }
-
+ 
   .opcion { background: rgba(255,255,255,0.06); color: #fff; border: 1.5px solid rgba(255,255,255,0.12); border-radius: var(--radius-md); padding: var(--space-4) var(--space-5); cursor: pointer; text-align: left; transition: all var(--t-fast); position: relative; font-family: inherit; }
   .opcion:hover { background: rgba(255,255,255,0.1); border-color: var(--c-verde-claro); transform: translateX(2px); }
   .opcion.selected { background: rgba(118, 166, 143, 0.2); border-color: var(--c-verde-claro); }
   .opcion-titulo { font-weight: 600; font-size: 1rem; margin-bottom: var(--space-1); }
   .opcion-desc { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
   .opcion-recomendado { position: absolute; top: -10px; right: 12px; background: var(--c-verde-claro); color: var(--c-azul-profundo); padding: 3px 10px; border-radius: var(--radius-pill); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; }
-
+ 
   .btn-row { display: flex; gap: var(--space-3); justify-content: space-between; margin-top: var(--space-8); align-items: center; }
   .btn-row :global(.btn-ghost) { color: rgba(255,255,255,0.6); }
   .btn-row :global(.btn-ghost):hover { color: #fff; }
   .btn-row :global(.btn-primary) { margin-left: auto; }
-
+ 
   .save-indicator { position: absolute; top: var(--space-4); right: var(--space-4); font-size: var(--fs-small); color: var(--c-verde-claro); opacity: 0; transition: opacity 200ms; font-weight: 500; }
   .save-indicator.visible { opacity: 1; }
-
+ 
   .success-card { text-align: center; }
   .success-card .check { width: 64px; height: 64px; border-radius: 50%; background: var(--c-verde-claro); color: var(--c-azul-profundo); display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 700; margin: 0 auto var(--space-6); }
 </style>
-
+ 
 <script>
-  // Cotizador con sync a /api/lead (HubSpot)
+  // Cotizador con sync a /api/lead (HubSpot) + honeypot + Habeas Data
   const state: Record<string, unknown> = JSON.parse(localStorage.getItem('espazios_lead') || '{}');
   let currentStep = 1;
   let canalElegido: string | null = null;
   let ciudadElegida: string | null = null;
   const STORAGE_LEAD_ID = 'espazios_lead_id';
-
+ 
   function uuid() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
       const r = Math.random() * 16 | 0;
@@ -209,7 +275,7 @@ const calendarUrl = import.meta.env.GOOGLE_CALENDAR_URL || 'https://calendar.goo
   const indicator = document.getElementById('saveIndicator')!;
   const progress = document.getElementById('progressFill')!;
   const stepNum = document.getElementById('stepNum')!;
-
+ 
   function showSave() {
     indicator.classList.add('visible');
     setTimeout(() => indicator.classList.remove('visible'), 1200);
@@ -251,16 +317,29 @@ const calendarUrl = import.meta.env.GOOGLE_CALENDAR_URL || 'https://calendar.goo
     const n = (document.getElementById('inpNombre') as HTMLInputElement).value.trim();
     const e = (document.getElementById('inpEmail') as HTMLInputElement).value.trim();
     const c = (document.getElementById('inpCelular') as HTMLInputElement).value.trim().replace(/\D/g, '');
-    const ok = n.length >= 3 && validEmail(e) && c.length >= 10;
+    const consent = (document.getElementById('inpConsentimiento') as HTMLInputElement).checked;
+    const ok = n.length >= 3 && validEmail(e) && c.length >= 10 && consent;
     (document.getElementById('btnPaso1') as HTMLButtonElement).disabled = !ok;
   }
   ['inpNombre', 'inpEmail', 'inpCelular'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', validateStep1);
   });
+  document.getElementById('inpConsentimiento')?.addEventListener('change', validateStep1);
+ 
   document.getElementById('btnPaso1')?.addEventListener('click', async () => {
+    // HONEYPOT: si el campo "website" está lleno = bot, simular éxito silencioso
+    const honeypot = (document.getElementById('inpWebsite') as HTMLInputElement).value;
+    if (honeypot) {
+      console.warn('[Cotizador] honeypot triggered — silent success');
+      goToStep(2);
+      return;
+    }
+ 
     persistField('nombre', (document.getElementById('inpNombre') as HTMLInputElement).value.trim());
     persistField('email', (document.getElementById('inpEmail') as HTMLInputElement).value.trim());
     persistField('celular', (document.getElementById('inpCelular') as HTMLInputElement).value.trim());
+    persistField('consentimientoHabeasData', true);
+    persistField('fechaConsentimiento', new Date().toISOString());
     await syncToHubSpot(1);
     goToStep(2);
   });
@@ -325,3 +404,4 @@ const calendarUrl = import.meta.env.GOOGLE_CALENDAR_URL || 'https://calendar.goo
     btn.addEventListener('click', () => { if (currentStep > 1) goToStep(currentStep - 1); });
   });
 </script>
+ 

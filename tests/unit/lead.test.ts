@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { sanitize, mapToHubSpotProps, rateLimitCheck, POST, GET } from './lead';
+import { sanitize, mapToHubSpotProps, rateLimitCheck, POST, GET } from '../../src/pages/api/lead';
 
 // Cada test de rate limit / POST usa una IP distinta para no compartir el
 // contador en memoria (Map a nivel de módulo) entre casos.

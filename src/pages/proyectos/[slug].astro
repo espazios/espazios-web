@@ -60,7 +60,7 @@ function getEmbedUrl(url?: string, plataforma?: string): string {
       <section class="video-section">
         <div class="container">
           <h2>Mira este proyecto en video</h2>
-          <div class="video-wrapper">
+          <div class:list={['video-wrapper', entry.data.videoPlataforma === 'TikTok' && 'video-wrapper--vertical']}>
             <iframe src={getEmbedUrl(entry.data.videoUrl, entry.data.videoPlataforma)}
               frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowfullscreen loading="lazy"></iframe>
@@ -109,6 +109,9 @@ function getEmbedUrl(url?: string, plataforma?: string): string {
   .video-section h2 { font-size: var(--fs-h2); margin-bottom: var(--space-6); text-align: center; }
   .video-wrapper { max-width: 800px; margin: 0 auto; aspect-ratio: 16/9; border-radius: var(--radius-lg); overflow: hidden; background: #000; }
   .video-wrapper iframe { width: 100%; height: 100%; border: 0; }
+  /* TikTok es vertical (9:16), no horizontal — un aspect-ratio 16:9 lo deja
+     aplastado con barras negras enormes a los costados. */
+  .video-wrapper--vertical { max-width: 360px; aspect-ratio: 9/16; }
 
   .proyecto-content { padding: var(--space-12) 0; }
   .content-wrap { max-width: 760px; margin: 0 auto; }

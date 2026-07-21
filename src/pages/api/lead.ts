@@ -17,7 +17,7 @@ export const prerender = false; // Server endpoint
 const HS_BASE = 'https://api.hubapi.com';
  
 // ===== Sanitización =====
-function sanitize(input: unknown, type: 'text' | 'email' | 'phone' | 'name' = 'text', maxLen = 500): string {
+export function sanitize(input: unknown, type: 'text' | 'email' | 'phone' | 'name' = 'text', maxLen = 500): string {
   if (input == null) return '';
   let s = String(input).trim().slice(0, maxLen);
   s = s.replace(/[<>]/g, '');
@@ -29,7 +29,7 @@ function sanitize(input: unknown, type: 'text' | 'email' | 'phone' | 'name' = 't
 }
  
 // ===== Mapeo a propiedades HubSpot =====
-function mapToHubSpotProps(payload: Record<string, unknown>): Record<string, string> {
+export function mapToHubSpotProps(payload: Record<string, unknown>): Record<string, string> {
   const nombre = sanitize(payload.nombre, 'name', 100);
   const partes = nombre.split(/\s+/);
   const firstname = partes[0] || '';
@@ -97,7 +97,7 @@ const requestLog = new Map<string, number[]>();
 const WINDOW_MS = 10 * 60 * 1000; // 10 min
 const MAX_REQUESTS = 10;
  
-function rateLimitCheck(ip: string): { allowed: boolean; retryAfter?: number } {
+export function rateLimitCheck(ip: string): { allowed: boolean; retryAfter?: number } {
   const now = Date.now();
   const list = requestLog.get(ip) || [];
   const recent = list.filter(t => now - t < WINDOW_MS);

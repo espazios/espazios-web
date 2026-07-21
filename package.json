@@ -9,15 +9,19 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "test": "vitest run"
   },
   "dependencies": {
-    "astro": "^4.16.7",
-    "@astrojs/vercel": "^7.8.2",
+    "@astrojs/mdx": "^3.1.9",
     "@astrojs/rss": "^4.0.9",
-    "@astrojs/mdx": "^3.1.9"
+    "@astrojs/vercel": "^7.8.2",
+    "astro": "^4.16.7"
   },
   "engines": {
     "node": "20.x"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.7"
   }
 }

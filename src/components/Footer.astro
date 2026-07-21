@@ -1,4 +1,5 @@
 ---
+import Logo from './Logo.astro';
 const currentYear = new Date().getFullYear();
 ---
 
@@ -7,7 +8,7 @@ const currentYear = new Date().getFullYear();
     <div class="footer-grid">
       <div class="footer-brand">
         <a href="/" class="footer-logo" aria-label="Espazios — Inicio">
-          <img src="/logo.svg" alt="Espazios" width="200" height="55" />
+          <Logo variant="white" />
         </a>
         <p class="footer-tagline">Especialistas en acabados de apartamentos en obra gris.</p>
       </div>
@@ -74,9 +75,8 @@ const currentYear = new Date().getFullYear();
   footer a:hover { color: var(--c-verde-claro); }
   .footer-brand { display: flex; flex-direction: column; gap: var(--space-3); }
   .footer-logo { display: inline-block; }
-  .footer-logo img {
-    width: 200px; height: auto;
-    filter: brightness(0) invert(1);
+  .footer-logo :global(.logo) {
+    height: 44px;
     opacity: 0.95;
   }
   .footer-tagline {

@@ -1,0 +1,48 @@
+---
+interface Props {
+  variant?: 'color' | 'white';
+  class?: string;
+}
+const { variant = 'color', class: className = '' } = Astro.props;
+const markColor = variant === 'white' ? '#ffffff' : '#80BF9B';
+const textColor = variant === 'white' ? '#ffffff' : '#163840';
+---
+
+<svg
+  class={`logo ${className}`}
+  viewBox="0 0 520 200"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+  role="img"
+  aria-label="Espazios"
+>
+  <title>Espazios</title>
+  <g fill={markColor}>
+    <rect x="0" y="60" width="32" height="140" />
+    <rect x="138" y="60" width="32" height="140" />
+    <polygon points="0,0 32,0 170,135 170,60 138,60 32,60 32,135" />
+    <rect x="60" y="120" width="32" height="80" />
+  </g>
+  <text
+    x="210"
+    y="150"
+    font-family="'Fraunces', Georgia, serif"
+    font-weight="500"
+    font-size="108"
+    fill={textColor}
+    letter-spacing="-1"
+  >Espazios</text>
+</svg>
+
+<style>
+  .logo {
+    height: 34px;
+    width: auto;
+    display: block;
+  }
+  @media (min-width: 900px) {
+    .logo {
+      height: 40px;
+    }
+  }
+</style>

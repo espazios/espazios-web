@@ -8,15 +8,14 @@
     <rect x="138" y="60" width="32" height="140"/>
     <!-- Diagonal superior (N) -->
     <polygon points="0,0 32,0 170,135 170,60 138,60 32,60 32,135"/>
-    <polygon points="138,135 170,135 170,200 138,200"/>
     <!-- Columna central pequeña -->
     <rect x="60" y="120" width="32" height="80"/>
   </g>
   <!-- Wordmark "Espazios" -->
-  <text x="210" y="155"
-        font-family="'Inter', system-ui, sans-serif"
-        font-weight="300"
-        font-size="120"
+  <text x="210" y="150"
+        font-family="'Fraunces', Georgia, serif"
+        font-weight="500"
+        font-size="108"
         fill="#163840"
-        letter-spacing="-2">Espazios</text>
+        letter-spacing="-1">Espazios</text>
 </svg>

@@ -1,4 +1,6 @@
 ---
+import Logo from './Logo.astro';
+
 interface Props {
   activeNav?: 'home' | 'servicios' | 'proyectos' | 'cotizador' | 'blog' | 'contacto';
 }
@@ -16,7 +18,7 @@ const links = [
 <nav class="navbar" aria-label="Navegación principal">
   <div class="nav-inner">
     <a href="/" class="nav-logo" aria-label="Espazios — Inicio">
-      <img src="/logo.svg" alt="Espazios" width="160" height="44" />
+      <Logo />
     </a>
 
     <ul class="nav-links">
@@ -60,13 +62,6 @@ const links = [
     display: flex; align-items: center;
     text-decoration: none;
     min-height: 44px;
-  }
-  .nav-logo img {
-    height: 34px; width: auto;
-    display: block;
-  }
-  @media (min-width: 900px) {
-    .nav-logo img { height: 40px; }
   }
   .nav-links { display: none; gap: var(--space-8); list-style: none; }
   @media (min-width: 900px) { .nav-links { display: flex; } }

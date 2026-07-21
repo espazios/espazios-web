@@ -10,7 +10,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@astrojs/mdx": "^3.1.9",
@@ -22,6 +23,7 @@
     "node": "20.x"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "vitest": "^3.2.7"
   }
 }

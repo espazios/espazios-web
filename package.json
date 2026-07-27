@@ -23,7 +23,7 @@
     "node": "20.x"
   },
   "devDependencies": {
-    "@playwright/test": "^1.61.1",
+    "@playwright/test": "^1.62.0",
     "vitest": "^3.2.7"
   }
 }

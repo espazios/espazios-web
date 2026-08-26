@@ -63,12 +63,62 @@ errores de captura y facilita el mapeo a las mismas categorías que usa el
 cotizador web (mismos rangos de presupuesto, mismas ciudades de cobertura,
 mismos tipos de proyecto).
 
-## 3. Embudo unificado de leads
+## 3. Isa v2 — agente generativo (Sandbox, `espazios-whatsapp-agent`)
 
-Ambos canales alimentan la misma intención de negocio (precalificar y agendar
-una asesoría), pero **no hay evidencia, en el código o la configuración
-revisada, de que el canal WhatsApp escriba al mismo HubSpot que usa el
-cotizador web** — ver hallazgo de gobierno de datos en
+Versión en desarrollo, probada en el Sandbox de Kapso al momento de esta
+revisión (2026-08-24) — **no ha reemplazado** al flujo v1 de la sección 2. En
+vez de un árbol de decisión fijo, un `agent node` con modelo Claude conduce
+la conversación libremente siguiendo un system prompt (`docs/isa-v2-system-prompt.md`,
+779 líneas) que igual debe recolectar los mismos 8 datos, en el mismo orden:
+`nombre → ciudad → tipo_proyecto → presupuesto → conjunto_o_barrio → m2 → plazo → correo`.
+
+```mermaid
+flowchart TD
+    A(["Usuario escribe a Isa v2<br/>(agent node, modelo Claude)"]) --> B["Isa saluda usando el nombre<br/>de perfil de WhatsApp (get_whatsapp_context)"]
+    B --> C["Aviso Habeas Data (Ley 1581/2012)<br/>+ pregunta de ciudad, en un solo mensaje"]
+    C --> D{"¿Ciudad cubierta<br/>para el tipo de proyecto?"}
+    D -- No --> Z(["Cierre cordial:<br/>'hoy no llegamos a esa zona'"])
+    D -- Sí --> E["tipo_proyecto (lista con negrilla)"]
+    E --> F["presupuesto (pregunta abierta)"]
+    F --> G{"¿Presupuesto<br/>alcanza el mínimo?"}
+    G -- "No, 1ra vez" --> G2["Isa maneja la objeción<br/>(hasta 2 intentos)"]
+    G -- Sí --> H["conjunto_o_barrio (texto libre)"]
+    G2 --> H
+    H --> I["m2 (numérico)"]
+    I --> J["plazo (pregunta abierta)"]
+    J --> K["correo (anuncia que viene<br/>un valor ilustrativo)"]
+    K --> L["<b>Tool call:</b> generar_estimado_ilustrativo<br/>→ POST /tools/estimado-ilustrativo"]
+    L --> M["Isa envía imagen con<br/>'Desde $X' de los 3 paquetes"]
+    M --> N{"¿Cliente pide detalle<br/>de un paquete?"}
+    N -- Sí --> N2["<b>Tool call:</b> ver_detalle_paquete<br/>→ POST /tools/detalle-paquete"]
+    N2 --> O
+    N -- No --> O["Pregunta corta:<br/>'¿dudas, o agendamos?'"]
+    O --> P["Logística de agendamiento<br/>(llamada / reunión / presencial)"]
+    P --> Q(["Handoff a Ejecutivo Comercial"])
+```
+
+Reglas de negocio explícitas en el repo que valen la pena resaltar:
+- **La cotización nunca la redacta el modelo en texto libre** — siempre sale
+  de fórmulas ya calculadas (Sheets/plantilla), el LLM solo la explica.
+  Esto limita el riesgo de que el modelo "invente" un precio.
+- El envío de fotos/videos del apartamento se reconoce y se guarda como
+  contexto para el Ejecutivo Comercial, pero Isa tiene instrucción explícita
+  de **no leer medidas ni datos como confirmados** a partir de una imagen.
+- El "estimado ilustrativo" (imagen con 3 paquetes) es la funcionalidad que
+  sí está conectada hoy; `generar_cotizacion` (PDF vía plantilla operativa
+  del cotizador, `src/tools/cotizador/`) existe en el código pero está
+  **dormida** — no forma parte del guion de conversación actual (ver
+  hallazgo de inyección de fórmulas en
+  [`03-analisis-seguridad.md`](./03-analisis-seguridad.md)).
+
+## 4. Embudo unificado de leads
+
+Los tres sistemas alimentan la misma intención de negocio (precalificar y
+agendar una asesoría), pero **no hay evidencia, en el código ni en la
+configuración revisada, de que ninguno de los dos canales de WhatsApp
+escriba al mismo HubSpot que usa el cotizador web** — de hecho, el propio
+`CLAUDE.md` de `espazios-whatsapp-agent` confirma esto explícitamente:
+`sync_hubspot: falta construir`. Ver hallazgo de gobierno de datos en
 [`03-analisis-seguridad.md`](./03-analisis-seguridad.md#hallazgo-info-1--sin-integración-visible-whatsapp--hubspot).
 
 ```mermaid
@@ -76,11 +126,16 @@ flowchart LR
     subgraph WEB["Canal Web"]
         W1["Cotizador<br/>(6 pasos)"]
     end
-    subgraph WA["Canal WhatsApp"]
-        WA1["Isa · Kapso<br/>('Precalificación Leads EZ')"]
+    subgraph WA1S["WhatsApp · Isa v1 (producción)"]
+        WA1["Flujo Kapso<br/>'Precalificación Leads EZ'"]
+    end
+    subgraph WA2S["WhatsApp · Isa v2 (Sandbox)"]
+        WA2["agent node (Claude)<br/>+ tools-server (Railway)"]
     end
     W1 -->|"POST /api/lead<br/>por cada paso"| CRM["HubSpot CRM<br/>(Contacts)"]
     WA1 -.->|"¿Integración?<br/>no confirmada"| CRM
+    WA2 -.->|"sync_hubspot:<br/>pendiente de construir"| CRM
     CRM --> SALES(["Equipo comercial<br/>Espazios"])
     WA1 -->|"handoff directo"| SALES
+    WA2 -->|"handoff directo<br/>(cuando salga de Sandbox)"| SALES
 ```

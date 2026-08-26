@@ -23,9 +23,20 @@ flowchart TB
         GCAL["Google Calendar<br/>(appointments/schedules)"]
     end
 
-    subgraph WA_STACK["Canal WhatsApp — Isa"]
+    subgraph WA_STACK["Canal WhatsApp — Isa v1 (producción)"]
         META["Meta / WhatsApp Cloud API<br/>+ Ads (click-to-WhatsApp)"]
         KAPSO["Kapso — Flow engine<br/>Flow: 'Precalificación Leads EZ'<br/>(agent-node / decide-node / send-interactive /<br/>send-template / wait-for-response)"]
+    end
+
+    subgraph WA2_STACK["Canal WhatsApp — Isa v2 (Sandbox)<br/>repo espazios/espazios-whatsapp-agent (público)"]
+        AGENT["Kapso — agent node<br/>(modelo Claude/Anthropic,<br/>system prompt en docs/isa-v2-system-prompt.md)"]
+        TOOLS["tools-server.ts (Fastify)<br/>Railway — espazios-whatsapp-agent-production<br/>⚠️ sin autenticación en /tools/*"]
+        GAUTH["google-auth.ts<br/>OAuth de usuario (espazios.co@gmail.com)<br/>scopes: drive, spreadsheets, calendar, gmail.send"]
+    end
+
+    subgraph GWORK["Google Workspace"]
+        GDRIVE["Google Drive<br/>plantilla del cotizador + copias"]
+        GSHEETS["Google Sheets<br/>Tarifas Ilustrativas + plantilla operativa"]
     end
 
     BROWSER -->|"fetch POST JSON"| LEAD
@@ -41,6 +52,13 @@ flowchart TB
 
     META <-->|"mensajes entrantes/salientes<br/>Cloud API"| KAPSO
     KAPSO -->|"plantillas aprobadas<br/>(ej. 'retomaproceso')"| META
+
+    META <-->|"mensajes entrantes/salientes"| AGENT
+    AGENT -->|"webhook tool call<br/>(sin header de autenticación)"| TOOLS
+    TOOLS -->|"credenciales OAuth"| GAUTH
+    GAUTH --> GDRIVE
+    GAUTH --> GSHEETS
+    TOOLS -->|"PNG renderizado (sharp)"| AGENT
 ```
 
 ## 2. Secuencia — sincronización progresiva del cotizador
@@ -127,7 +145,41 @@ muestran el valor del último input del usuario como `[FILTERED]` — Kapso
 redacta el contenido capturado por variables en sus logs de auditoría, lo
 cual reduce la exposición de PII en la capa de observabilidad.
 
-## 5. Mapa de datos personales (PII)
+## 5. Secuencia — herramientas de Isa v2 (`tools-server.ts`, Railway)
+
+```mermaid
+sequenceDiagram
+    participant Agent as Kapso agent node (Claude)
+    participant TS as tools-server.ts (Fastify, Railway)
+    participant Sheets as Google Sheets ("Tarifas Ilustrativas")
+    participant Drive as Google Drive (plantilla cotizador)
+
+    Agent->>TS: POST /tools/estimado-ilustrativo<br/>{nombre, ciudad, proyecto, m2}
+    Note over TS: sin validar ningún header/secreto —<br/>cualquier cliente HTTP puede llamar esta misma ruta
+    TS->>Sheets: values.get("Tarifas!A2:D")
+    Sheets-->>TS: rangos de precio por m2 y paquete
+    TS->>TS: renderTarjeta() con sharp (SVG→PNG)
+    TS-->>Agent: {imageUrl, paquetes[]}
+    Agent->>TS: GET /tools/estimados/:id (id = randomUUID)
+    TS-->>Agent: image/png
+
+    Note over Agent,Drive: generar_cotizacion NO está conectada al guion de<br/>conversación hoy, pero la ruta HTTP sigue activa:
+    Agent-->TS: POST /tools/generar-cotizacion<br/>{clienteNombre, ciudad, tipoProyecto, m2, nivelAcabado, telefono}
+    TS->>Drive: files.copy(plantilla) → nueva hoja
+    TS->>Sheets: values.batchUpdate(valueInputOption:"USER_ENTERED", ...)
+    Note over Sheets: USER_ENTERED interpreta el valor como si un<br/>usuario lo hubiera tecleado — una celda que empiece<br/>con "=" se ejecuta como fórmula (ver hallazgo CRÍTICO-2)
+    Sheets-->>TS: valores calculados (rangoBajo, rangoAlto)
+    TS->>Sheets: export?format=pdf (bearer token)
+    TS->>Drive: files.create(pdf)
+    TS-->>Agent: {rangoBajo, rangoAlto, pdfUrl, spreadsheetUrl}
+```
+
+`GET /tools/cotizaciones/:fileId` reenvía el contenido de **cualquier**
+`fileId` de Drive que el cliente pida, usando las credenciales propias del
+servidor (scope `drive` completo, no `drive.file`) — ver hallazgo
+correspondiente en el análisis de seguridad.
+
+## 6. Mapa de datos personales (PII)
 
 | Dato | Origen | Dónde se captura | Dónde se sincroniza/almacena | Consentimiento explícito |
 |---|---|---|---|---|
@@ -139,6 +191,18 @@ cual reduce la exposición de PII en la capa de observabilidad.
 | Plazo / tiempo de inicio | Web + WhatsApp | Pasos 5 | localStorage → HubSpot / Kapso | Igual que arriba |
 | Nombre público de contacto (WhatsApp) | WhatsApp | Perfil del contacto | Kapso (`whatsapp_conversations`) | N/A (metadata de la plataforma) |
 | `ctwa_clid`, creative/anuncio de origen | WhatsApp (referral de Meta Ads) | Primer mensaje | Kapso (evento `referral`) | N/A (atribución de marketing) |
+| Metros cuadrados (m²) | WhatsApp (Isa v2) | Pregunta directa en el flujo | Enviado a `tools-server.ts` → nunca persistido ahí (solo pasa por memoria de proceso, TTL 1h para la imagen generada) | Cubierto por el aviso Habeas Data del saludo inicial |
+| Nombre, ciudad, tipo de proyecto, m², nivel de acabado, teléfono (ruta `generar_cotizacion`, dormida) | WhatsApp (Isa v2) | Tool call `generar_cotizacion` | Copia nueva de la plantilla del cotizador en **Google Drive/Sheets** (cuenta `espazios.co@gmail.com`) | Igual que arriba |
+
+**Credenciales de Google:** `google-auth.ts` centraliza el acceso a Drive,
+Sheets, Calendar y Gmail en una sola identidad. Según el propio `CLAUDE.md`
+del repo, esa identidad **no es una cuenta de servicio clásica** — es un
+token OAuth de usuario (`"type": "authorized_user"`) obtenido con la cuenta
+personal `espazios.co@gmail.com`, porque la política del proyecto de Google
+Cloud bloquea la creación de llaves de cuenta de servicio. El JSON de esas
+credenciales se pasa como variable de entorno (`GOOGLE_SERVICE_ACCOUNT_JSON`)
+en Railway — ver hallazgo de alcance de privilegios en el análisis de
+seguridad.
 
 `leadId` en el canal web es un UUID v4 generado **en el cliente** con
 `Math.random()` (no `crypto.randomUUID()`), almacenado en `localStorage`, y

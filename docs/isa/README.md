@@ -33,7 +33,8 @@ de Habeas Data con bloqueo server-side, cabeceras de seguridad HSTS/CSP/Permissi
 cookies de OAuth `HttpOnly`+`Secure`+`SameSite`, Dependabot activo, CI que bloquea
 merges rotos, `.gitignore` correcto en ambos repos — no hay secretos versionados).
 
-El análisis identifica **17 hallazgos** en total. Los más urgentes están en
+El análisis identifica **21 hallazgos** en total (2 críticos, 5 altos, 7
+medios, 3 bajos, 4 informativos). Los más urgentes están en
 **`espazios-whatsapp-agent`** (todavía en Sandbox, pero con endpoints ya
 expuestos a internet en Railway):
 

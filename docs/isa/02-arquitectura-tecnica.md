@@ -29,7 +29,7 @@ flowchart TB
     end
 
     subgraph WA2_STACK["Canal WhatsApp — Isa v2 (Sandbox)<br/>repo espazios/espazios-whatsapp-agent (público)"]
-        AGENT["Kapso — agent node<br/>(modelo Claude/Anthropic,<br/>system prompt en docs/isa-v2-system-prompt.md)"]
+        AGENT["Kapso — agent node<br/>(modelo real: gpt-5-mini/OpenAI,<br/>confirmado por logs — CLAUDE.md sugiere Claude/Anthropic<br/>system prompt en docs/isa-v2-system-prompt.md)"]
         TOOLS["tools-server.ts (Fastify)<br/>Railway — espazios-whatsapp-agent-production<br/>⚠️ sin autenticación en /tools/*"]
         GAUTH["google-auth.ts<br/>OAuth de usuario (espazios.co@gmail.com)<br/>scopes: drive, spreadsheets, calendar, gmail.send"]
     end
@@ -149,7 +149,7 @@ cual reduce la exposición de PII en la capa de observabilidad.
 
 ```mermaid
 sequenceDiagram
-    participant Agent as Kapso agent node (Claude)
+    participant Agent as Kapso agent node (gpt-5-mini)
     participant TS as tools-server.ts (Fastify, Railway)
     participant Sheets as Google Sheets ("Tarifas Ilustrativas")
     participant Drive as Google Drive (plantilla cotizador)

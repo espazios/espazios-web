@@ -67,14 +67,18 @@ mismos tipos de proyecto).
 
 Versión en desarrollo, probada en el Sandbox de Kapso al momento de esta
 revisión (2026-08-24) — **no ha reemplazado** al flujo v1 de la sección 2. En
-vez de un árbol de decisión fijo, un `agent node` con modelo Claude conduce
+vez de un árbol de decisión fijo, un `agent node` con modelo **`gpt-5-mini`
+de OpenAI** (confirmado por logs en vivo de Kapso — `CLAUDE.md` describe el
+`agent node` como si soportara "modelos Anthropic/Claude", pero el modelo
+realmente configurado hoy es de OpenAI, enrutado por la infraestructura de
+Kapso) conduce
 la conversación libremente siguiendo un system prompt (`docs/isa-v2-system-prompt.md`,
 779 líneas) que igual debe recolectar los mismos 8 datos, en el mismo orden:
 `nombre → ciudad → tipo_proyecto → presupuesto → conjunto_o_barrio → m2 → plazo → correo`.
 
 ```mermaid
 flowchart TD
-    A(["Usuario escribe a Isa v2<br/>(agent node, modelo Claude)"]) --> B["Isa saluda usando el nombre<br/>de perfil de WhatsApp (get_whatsapp_context)"]
+    A(["Usuario escribe a Isa v2<br/>(agent node, modelo gpt-5-mini vía Kapso)"]) --> B["Isa saluda usando el nombre<br/>de perfil de WhatsApp (get_whatsapp_context)"]
     B --> C["Aviso Habeas Data (Ley 1581/2012)<br/>+ pregunta de ciudad, en un solo mensaje"]
     C --> D{"¿Ciudad cubierta<br/>para el tipo de proyecto?"}
     D -- No --> Z(["Cierre cordial:<br/>'hoy no llegamos a esa zona'"])
@@ -130,7 +134,7 @@ flowchart LR
         WA1["Flujo Kapso<br/>'Precalificación Leads EZ'"]
     end
     subgraph WA2S["WhatsApp · Isa v2 (Sandbox)"]
-        WA2["agent node (Claude)<br/>+ tools-server (Railway)"]
+        WA2["agent node (gpt-5-mini)<br/>+ tools-server (Railway)"]
     end
     W1 -->|"POST /api/lead<br/>por cada paso"| CRM["HubSpot CRM<br/>(Contacts)"]
     WA1 -.->|"¿Integración?<br/>no confirmada"| CRM

@@ -39,6 +39,54 @@ flowchart LR
 Cerrar **solo CRÍTICO-1** (autenticar el servidor) ya corta las dos ramas —
 es el cambio de mayor apalancamiento de todo este análisis.
 
+### Evidencia en vivo (logs de Kapso e historial completo de git)
+
+Esta ronda de revisión dejó de ser solo lectura de código: se hizo
+`git fetch --unshallow` sobre el clon local (antes solo se veía el último
+commit) y se consultaron los logs de ejecución reales del proyecto Kapso
+de los últimos 30 días. Hallazgos concretos:
+
+- **Historial de git limpio.** Ningún archivo con nombre sensible
+  (`.env`, `secrets/`, `*.key.json`, `service-account*`) fue commiteado
+  jamás en los 37 commits del repo — solo `.env.example` (la plantilla,
+  correcto). Un grep de patrones de credenciales (`AIza...`, `ya29....`,
+  cabeceras `PRIVATE KEY`, `client_secret`) sobre el diff completo de todo
+  el historial no encontró nada. Refuerza el aspecto positivo ya anotado,
+  esta vez con el historial completo, no solo el estado actual.
+- **El propio repo ya sabía cómo autenticar un webhook — antes de perder
+  esa práctica.** Antes del pivote de arquitectura del 2026-08-16 (commit
+  `031bad5`), el repo tenía `src/channel/webhook.ts` con verificación de
+  firma (`verifySignature`, cabecera `X-Hub-Signature-256`, secreto
+  `KAPSO_WEBHOOK_SECRET`, rechazo con 401 si la firma no es válida) para
+  el webhook que entonces recibía mensajes de Kapso. Esa lógica se borró
+  al migrar a la arquitectura actual (Kapso llama, en vez de nosotros
+  recibir) y **nunca se repuso del otro lado** — es exactamente el hueco
+  de CRÍTICO-1. Evidencia concreta de que el equipo ya sabe implementar
+  esto bien; el fix no es una práctica nueva, es recuperar una que ya
+  existió en este mismo repo.
+- **El modelo real es `gpt-5-mini` (OpenAI), no Claude/Anthropic.**
+  `CLAUDE.md` describe el `agent node` como si "soportara modelos
+  Anthropic/Claude", pero los eventos `agent_step_started` de Kapso
+  registran, en cada turno real de conversación, `"model":"gpt-5-mini"`.
+  Esto no es un hallazgo de seguridad en sí, pero sí corrige la
+  arquitectura documentada (ver `02-arquitectura-tecnica.md`, ya
+  actualizado) y tiene una implicación de cumplimiento real — ver
+  MEDIO-8, abajo.
+- **Sin evidencia, en 30 días de logs, de que las herramientas propias
+  (`generar_estimado_ilustrativo`, `ver_detalle_paquete`,
+  `generar_cotizacion`) se hayan invocado alguna vez desde una
+  conversación real.** `search_logs` con `source=external_api_log` y
+  `source=webhook_delivery` no devolvió **ningún** evento en el proyecto
+  completo en 30 días. Se rastreó turno por turno una ejecución completa
+  del flujo "Isa v2 (IA generativa)" y las únicas herramientas invocadas
+  fueron las nativas de Kapso (`save_variable`, `send_notification_to_user`,
+  `enter_waiting`, `complete_task`) — ninguna herramienta personalizada de
+  `tools-server.ts`. Esto **atempera, sin eliminar**, el "segundo vector"
+  descrito en CRÍTICO-2 (inyección vía conversación): hoy no hay evidencia
+  de que esas herramientas estén conectadas como *tools* del `agent node`
+  en esta ejecución del flujo — el vector directo por HTTP (CRÍTICO-1)
+  sigue siendo válido y probado independientemente de esto.
+
 ### Hallazgo CRÍTICO-1 — `tools-server.ts` no autentica ninguna petición
 
 **Dónde:** `src/tools-server.ts` — todas las rutas (`/tools/generar-cotizacion`,
@@ -128,7 +176,11 @@ impide que el modelo lo repita tal cual** al llamar a `generar_cotizacion`
 el día que esa herramienta se conecte al guion — el mismo bug de
 CRÍTICO-2 se dispararía sin que nadie llame a la API directamente. Es una
 razón más para arreglarlo en el código (`RAW` en vez de `USER_ENTERED`) en
-vez de confiar en que la herramienta siga sin usarse.
+vez de confiar en que la herramienta siga sin usarse. *(Actualización: los
+logs de Kapso de los últimos 30 días no muestran ninguna invocación real
+de `generar_cotizacion` — ver "Evidencia en vivo" arriba — así que este
+segundo vector parece no estar activo hoy. El vector directo por HTTP sí
+está confirmado y no depende de esto.)*
 
 **Recomendación:**
 - Cambiar a `valueInputOption: "RAW"` — inserta el valor literal, sin
@@ -295,6 +347,34 @@ MEDIO-6), nadie recibe aviso automático de esto.
 upgrade mayor de `sharp`/`googleapis` cuando haya ventana de pruebas, dado
 que ambos paquetes están en el camino crítico (renderizado de imágenes y
 todas las llamadas a Google APIs).
+
+### Hallazgo MEDIO-8 — Subprocesador de IA (OpenAI, vía Kapso) sin revelar
+
+**Dónde:** arquitectura real de Isa v2, confirmada por logs de Kapso —
+`docs/isa-v2-system-prompt.md` no lo aclara, y `CLAUDE.md` sugiere lo
+contrario ("agent node... soporta modelos Anthropic/Claude").
+
+Cada mensaje que un cliente le escribe a Isa v2 — nombre, ciudad, barrio,
+presupuesto, correo — se envía a **`gpt-5-mini` de OpenAI** para que el
+modelo genere la respuesta, enrutado a través de la infraestructura de
+Kapso (que actúa como intermediario/BSP). Es decir, hay un subprocesador
+de datos personales adicional (OpenAI, un proveedor con sede en EE.UU.) en
+la cadena, más allá de Kapso y HubSpot.
+
+**Impacto:** la Ley 1581 de 2012 (Habeas Data, Colombia) exige informar al
+titular cuando sus datos se transfieren a terceros, especialmente en
+transferencias internacionales. La política de privacidad de Espazios (la
+misma que exige el cotizador web) no menciona a OpenAI ni a Kapso como
+destinatarios de los datos — es un hueco de transparencia, no una
+filtración, pero sí un tema de cumplimiento real una vez Isa v2 salga de
+Sandbox y empiece a hablar con clientes reales.
+
+**Recomendación:** cuando se decida el corte de producción hacia Isa v2,
+actualizar la política de tratamiento de datos (`/politica-privacidad` en
+`espazios-web`) para nombrar explícitamente a Kapso y al proveedor del
+modelo de IA como encargados/subprocesadores, y confirmar con el equipo
+legal si aplica alguna cláusula adicional por ser una transferencia
+internacional.
 
 ### Hallazgo BAJO-4 — Sin límite de regeneraciones por conversación
 

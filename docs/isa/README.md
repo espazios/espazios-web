@@ -6,7 +6,7 @@ distintos, en dos repositorios:
 
 1. **Cotizador web** (`espazios/espazios-web`) — wizard de 6 pasos embebido en [espazios.com.co](https://www.espazios.com.co) (`src/components/Cotizador.astro`), con sincronización progresiva a HubSpot vía `/api/lead`.
 2. **Isa v1 en WhatsApp** — flujo tipo árbol de decisión (IVR) "Precalificación Leads EZ", configurado directamente en el dashboard de [Kapso](https://kapso.ai) sobre el número de WhatsApp Business `+57 310 8708467`. **Es la que está en producción hoy**, alimentada principalmente por clics en anuncios de Meta (Facebook/Instagram, *click-to-WhatsApp*).
-3. **Isa v2 en WhatsApp** (repo separado [`espazios/espazios-whatsapp-agent`](https://github.com/espazios/espazios-whatsapp-agent), **público**) — la versión generativa: un `agent node` de Kapso con un modelo Claude/Anthropic como cerebro de la conversación, que llama a un servidor de herramientas de negocio propio (`src/tools-server.ts`, Fastify) desplegado en Railway, el cual a su vez habla con Google Sheets/Drive/Calendar para calcular estimados y (a futuro) generar cotizaciones y agendar citas. **En pruebas de Sandbox al momento de esta revisión (2026-08-24)** — todavía no reemplaza a Isa v1 en producción.
+3. **Isa v2 en WhatsApp** (repo separado [`espazios/espazios-whatsapp-agent`](https://github.com/espazios/espazios-whatsapp-agent), **público**) — la versión generativa: un `agent node` de Kapso (confirmado por logs en vivo corriendo sobre **`gpt-5-mini` de OpenAI**, no Claude/Anthropic como sugiere `CLAUDE.md` del repo) como cerebro de la conversación, que puede llamar a un servidor de herramientas de negocio propio (`src/tools-server.ts`, Fastify) desplegado en Railway, el cual a su vez habla con Google Sheets/Drive/Calendar para calcular estimados y (a futuro) generar cotizaciones y agendar citas. **En pruebas de Sandbox al momento de esta revisión (2026-08-24)** — todavía no reemplaza a Isa v1 en producción.
 
 Este directorio reúne la documentación pedida: diagramas funcionales, diagramas
 técnicos y el análisis de ciberseguridad / seguridad digital de los tres.
@@ -33,7 +33,7 @@ de Habeas Data con bloqueo server-side, cabeceras de seguridad HSTS/CSP/Permissi
 cookies de OAuth `HttpOnly`+`Secure`+`SameSite`, Dependabot activo, CI que bloquea
 merges rotos, `.gitignore` correcto en ambos repos — no hay secretos versionados).
 
-El análisis identifica **23 hallazgos** en total (2 críticos, 5 altos, 7
+El análisis identifica **24 hallazgos** en total (2 críticos, 5 altos, 8
 medios, 4 bajos, 5 informativos). Los más urgentes están en
 **`espazios-whatsapp-agent`** (todavía en Sandbox, pero con endpoints ya
 expuestos a internet en Railway):

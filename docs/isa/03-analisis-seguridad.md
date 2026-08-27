@@ -72,6 +72,16 @@ memoria — ver hallazgo ALTO-2 de `espazios-web` para el mismo error) y con
 `PUBLIC_BASE_URL` como algo que no se anuncie en documentación pública (ver
 MEDIO-5, abajo).
 
+**✅ Riesgo bajo, pero hay que hacer los dos lados a la vez:** como Isa v2
+todavía no atiende clientes reales, no hay tráfico de producción que se
+pueda romper. El único cuidado es de **secuencia**: si se agrega el
+middleware de autenticación en `tools-server.ts` antes de configurar el
+mismo header en Kapso, las pruebas de Sandbox empiezan a fallar (401) hasta
+que se configure el otro lado — sin impacto real, pero puede confundir
+mientras se prueba. Desplegar ambos cambios juntos, o probar primero con
+un valor "de transición" que loggee sin bloquear antes de exigirlo de
+verdad.
+
 ### Hallazgo CRÍTICO-2 — Inyección de fórmulas en Google Sheets
 
 **Dónde:** `src/tools/cotizador/generate-quote.ts`, `sheets.spreadsheets.values.batchUpdate` con `valueInputOption: "USER_ENTERED"`.
@@ -131,6 +141,18 @@ vez de confiar en que la herramienta siga sin usarse.
 - No depender de que la función esté "dormida" como mitigación — arreglarlo
   ahora, ya que el endpoint ya es alcanzable.
 
+**✅ Este fix es de bajo riesgo de romper algo — dos razones concretas:**
+`field-map.ts` todavía tiene los rangos de celda marcados como
+`// TODO: EJEMPLO` (no apuntan a la plantilla real todavía), así que
+`generar_cotizacion` no está conectada a ningún dato de producción hoy; y
+`metrosCuadrados` ya viaja como número nativo de JS en el payload (no como
+texto), así que `RAW` no le cambia el tipo a la única celda que de verdad
+necesita ser numérica para que las fórmulas de la plantilla calculen bien.
+De hecho, `RAW` probablemente **arregla** un bug latente: con
+`USER_ENTERED`, un `telefono` que empiece con `+` (ej. `+57 300 1234567`,
+un formato de teléfono perfectamente normal) ya se interpretaría hoy como
+inicio de fórmula.
+
 ### Hallazgo ALTO-4 — `/tools/cotizaciones/:fileId` como proxy de lectura de Drive de alcance amplio
 
 **Dónde:** `src/tools/cotizador/generate-quote.ts` (`getQuotePdfBytes`) +
@@ -150,11 +172,25 @@ adivinar a ciegas, pero tampoco son secretos: circulan en enlaces
 compartidos, y en este caso la propia app expone varios en sus respuestas
 JSON (`spreadsheetUrl`, `pdfDriveFileId`).
 
-**Recomendación:** además de resolver CRÍTICO-1, reducir el scope a
-`drive.file` (acceso solo a archivos creados por la app) y llevar un
-registro propio (los `fileId` que el servidor generó) contra el cual
-validar cada solicitud de descarga, en vez de confiar ciegamente en
-cualquier `fileId` recibido.
+**Recomendación — ojo, en dos pasos, no uno solo:**
+1. **Hacer primero, sin riesgo:** agregar el registro propio de `fileId`
+   generados por el servidor y rechazar cualquier `fileId` que no esté en
+   ese registro. Esto ya cierra el hallazgo (deja de ser un proxy abierto)
+   sin tocar credenciales ni permisos.
+2. **⚠️ Reducir el scope a `drive.file` — NO hacerlo a la ligera.** `drive.file`
+   solo da acceso a archivos que la propia app creó (o que el usuario abrió
+   explícitamente vía un selector de Google) — **no** a archivos que ya
+   existían y simplemente se compartieron con la cuenta. La plantilla del
+   cotizador (`COTIZADOR_TEMPLATE_ID`) y la hoja "Tarifas Ilustrativas"
+   (`TARIFAS_ILUSTRATIVAS_SHEET_ID`) — la que sí está en uso real, probada
+   end-to-end según `CLAUDE.md` — son exactamente ese caso: archivos
+   preexistentes compartidos con `espazios.co@gmail.com`, no creados por
+   esta app. Cambiar el scope sin más **rompería el único flujo que hoy
+   funciona** (leer tarifas, copiar la plantilla) con errores 403 de
+   Google. Si se hace, debe ir en una ventana de pruebas dedicada,
+   verificando que el estimado ilustrativo y la copia de plantilla sigan
+   funcionando antes de desplegar — nunca como parte de una limpieza
+   rápida de otros hallazgos.
 
 ### Hallazgo ALTO-5 — Credenciales de Google: cuenta personal con scopes amplios
 
@@ -189,12 +225,16 @@ de confidencialidad, ya anotado como aceptado en el propio `CLAUDE.md`.
 
 **Recomendación:**
 - Quitar `gmail.send` de los `SCOPES` mientras no haya una funcionalidad
-  real que lo use (principio de mínimo privilegio).
-- Si la política de la organización de Google Cloud lo permite más
-  adelante, migrar a una cuenta de servicio dedicada. Mientras tanto,
-  considerar una cuenta de Google Workspace *dedicada al bot* (no la cuenta
-  personal del fundador) para reducir el radio de exposición si el JSON se
-  filtra.
+  real que lo use (principio de mínimo privilegio). **Sin riesgo** —
+  ninguna parte del código llama a la API de Gmail hoy.
+- ⚠️ Migrar a una cuenta de servicio dedicada o a una cuenta de Workspace
+  distinta **sí es una migración real, no un ajuste**: implica volver a
+  compartir la plantilla del cotizador, la carpeta de salida, la hoja de
+  tarifas y el calendario del asesor con la identidad nueva, actualizar la
+  variable de entorno en Railway, y volver a probar todo end-to-end. Si
+  algo queda sin re-compartir, el síntoma es el mismo 403 silencioso que en
+  ALTO-4. Tratarlo como su propio proyecto con ventana de pruebas, no como
+  parte de la tanda de *quick wins*.
 
 ### Hallazgo MEDIO-5 — Repositorio público con detalle operativo de producción
 
@@ -356,6 +396,20 @@ verificación de integridad (SRI) declarada en el CSP.
   esa ruta en `vercel.json`) en vez de aplicarla a todo el sitio.
 - Añadir `integrity` (SRI) al script cargado desde `unpkg.com`.
 
+**⚠️ Este es el hallazgo con más riesgo real de romper algo visible de
+todo este análisis.** Retirar `'unsafe-inline'`/`'unsafe-eval'` sin nonces
+correctamente aplicados **rompe en silencio** cualquier `<script>` inline
+que el navegador ya no ejecute — y eso incluye el propio script del
+cotizador (`Cotizador.astro`), el menú móvil, las animaciones "reveal", y
+muy probablemente el bundle de Decap CMS en `/admin` (herramientas como
+Decap suelen depender de `eval`-like patterns internamente). El navegador
+no avisa con un error visible al usuario — el botón simplemente deja de
+responder. **No lo despliegues como un cambio de una línea:** hazlo primero
+en un preview de Vercel, prueba el cotizador de punta a punta y el login
+de `/admin`, y si `/admin` sigue necesitando `unsafe-eval`, usa el bloque
+de headers específico para `/admin/*` que ya existe en `vercel.json` en
+vez de forzarlo a nivel global.
+
 ### Hallazgo ALTO-2 — Rate limit no persistente en `/api/lead`
 
 **Dónde:** `src/pages/api/lead.ts`, `requestLog = new Map<string, number[]>()`.
@@ -373,6 +427,15 @@ denegación de servicio de bajo costo.
 **Recomendación:** mover el contador a un almacén compartido (Vercel KV,
 Upstash Redis, Edge Config) o delegar el rate limiting a una capa perimetral
 (Vercel Firewall / WAF, Cloudflare) delante de `/api/*`.
+
+**⚠️ Riesgo si se hace mal:** el store compartido se vuelve una dependencia
+nueva en el camino crítico de captura de leads — el negocio completo pasa
+por este endpoint. Si el store falla o hay un error de configuración, hay
+que decidir explícitamente qué pasa: **diseñarlo "fail-open"** (si el store
+no responde, dejar pasar la solicitud igual) es más seguro para el negocio
+que "fail-closed" (bloquear todo), porque un fallo del store nunca debe
+poder tumbar la captura de leads reales — solo debilita temporalmente la
+protección anti-spam, que es un riesgo mucho menor que perder leads.
 
 ### Hallazgo ALTO-3 — Dependencias con CVEs conocidos
 
@@ -392,10 +455,17 @@ directamente en `package.json`), pero `sharp` se usa en tiempo de ejecución
 para el `imageService` del adaptador de Vercel — procesa imágenes que en
 última instancia pueden venir de contenido subido vía Decap CMS.
 
-**Recomendación:** `npm audit fix` resuelve la mayoría sin cambios de
-breaking; `sharp` requiere subir Astro a una versión mayor (`npm audit fix
---force` → Astro 7) — planificarlo como tarea aparte, no automática, dado que
-Dependabot ya está configurado para ignorar majors.
+**Recomendación:** `npm audit fix` (sin `--force`) resuelve `nanoid`, `tar`
+y `postcss` sin cambios incompatibles — **seguro de aplicar**. `sharp`
+requiere subir Astro a una versión mayor (`npm audit fix --force` → Astro
+7) — **npm mismo lo marca como *breaking change*; no lo corras a la
+ligera.** Un salto mayor de Astro puede afectar el adaptador de Vercel
+(`@astrojs/vercel`), MDX y el pipeline de imágenes — planificarlo como
+tarea aparte con su propio build/preview de prueba, no como parte de un
+`npm audit fix --force` corrido de pasada. Es justamente el tipo de cambio
+que Dependabot ya está configurado para NO proponer automáticamente
+(`ignore: update-types: ["version-update:semver-major"]`) — respeta esa
+señal.
 
 ### Hallazgo MEDIO-1 — `state` CSRF generado con `Math.random()`
 
@@ -435,6 +505,15 @@ que el de producción.
 (`https://www.espazios.com.co/api/callback`) leída de variable de entorno,
 en vez de derivarla de `request.url`.
 
+**⚠️ Coordinar con la configuración de la GitHub OAuth App antes de
+desplegar:** GitHub valida que el `redirect_uri` recibido coincida
+exactamente con la(s) *Authorization callback URL* registrada(s) en
+Settings → Developer settings → OAuth Apps. Si se fija la constante a
+`https://www.espazios.com.co/api/callback` pero esa URL exacta no está
+registrada ahí (o si `/admin` sigue probándose desde un dominio de
+preview), el login de Decap CMS se rompe con un error de GitHub, no de
+este código. Verificar la OAuth App primero, cambiar el código después.
+
 ### Hallazgo MEDIO-3 — `base_url` de Decap apunta a una URL de preview
 
 **Dónde:** `public/admin/config.yml`.
@@ -454,6 +533,12 @@ a un dominio secundario de infraestructura.
 
 **Recomendación:** completar el cambio ya anotado en el propio comentario —
 usar el dominio canónico de producción.
+
+**⚠️ Mismo cuidado que MEDIO-2:** cambiar `base_url` en `config.yml` sin
+que el dominio de producción (`www.espazios.com.co`) esté también
+registrado como *callback URL* válida en la GitHub OAuth App rompe el
+login de `/admin`. Hacer los dos cambios (MEDIO-2 y MEDIO-3) juntos, en la
+misma verificación, porque en la práctica son la misma coordinación.
 
 ### Hallazgo MEDIO-4 — `leadId` sin autenticación ni integridad
 
@@ -601,28 +686,59 @@ de Markdown (`rehype-sanitize` u opción equivalente).
 | Registro de fecha de consentimiento | ✅ `fechaConsentimiento` (ISO) persistido junto al lead | ⚠️ No aplica actualmente | ⚠️ No verificado en el código revisado |
 | Enlace a política de privacidad | ✅ `/politica-privacidad` | ⚠️ No observado | ⚠️ No observado en el prompt |
 
+## ¿Alguna subsanación puede romper algo ya construido?
+
+Sí, varias — no todas, pero conviene saber cuáles antes de empezar a
+aplicar la lista de abajo. Reorganizando los 21 hallazgos por ese criterio:
+
+| Riesgo de romper algo | Hallazgos | Por qué |
+|---|---|---|
+| ✅ **Bajo — seguro de aplicar directo** | CRÍTICO-1, CRÍTICO-2, MEDIO-1, MEDIO-4, BAJO-1, BAJO-2, BAJO-3, MEDIO-6, `npm audit fix` sin `--force` (parte de ALTO-3/MEDIO-7), quitar `gmail.send` (parte de ALTO-5) | Son cambios aditivos o reemplazos que no dependen de datos/config externa que ya esté en uso, o afectan una función que hoy no tiene tráfico real |
+| ⚠️ **Medio — necesita coordinar un segundo sistema** | MEDIO-2 + MEDIO-3 (deben ir juntos, y coordinados con la GitHub OAuth App), ALTO-2 (diseñar "fail-open" o puede bloquear leads reales si el store falla), MEDIO-3 requiere la misma coordinación | El código por sí solo no rompe nada, pero si el sistema externo (GitHub OAuth App, el store de rate limit) no está alineado, sí hay una ventana de falla real (login roto, leads bloqueados) |
+| 🔴 **Alto — necesita ventana de pruebas dedicada, no un ajuste rápido** | ALTO-1 (CSP sin `unsafe-inline`/`unsafe-eval` puede romper el cotizador, el menú móvil y/o `/admin` en silencio), la parte "reducir a `drive.file`" de ALTO-4, la migración de identidad de ALTO-5, el upgrade mayor de Astro/`sharp` (`npm audit fix --force`, parte de ALTO-3) | Cambian el comportamiento de algo que **hoy funciona** (permisos de Drive ya compartidos, scripts inline que el sitio ya usa, versión mayor de un framework) — el riesgo no es hipotético, es del mismo tipo que el problema que se quiere arreglar |
+
+La regla práctica: todo lo verde de la hoja de ruta de abajo se puede hacer
+esta semana sin pedir ventana de mantenimiento. Lo ámbar necesita verificar
+el otro lado (GitHub OAuth App / el store nuevo) antes de desplegar. Lo
+rojo necesita un preview de prueba y una validación manual — nunca
+desplegarlo junto con otros cambios, para poder aislar qué lo rompió si
+algo falla.
+
 ## Hoja de ruta sugerida (por esfuerzo/impacto)
 
-0. **Antes que nada — `espazios-whatsapp-agent` (ya expuesto en internet):**
-   agregar autenticación a `tools-server.ts` (CRÍTICO-1) y cambiar
+0. **Antes que nada — `espazios-whatsapp-agent` (ya expuesto en internet,
+   y de bajo riesgo de romper algo — ver tabla arriba):** agregar
+   autenticación a `tools-server.ts` (CRÍTICO-1) y cambiar
    `valueInputOption` a `"RAW"` en `generate-quote.ts` (CRÍTICO-2). Son dos
    cambios acotados (un middleware + una constante) que cierran la
    superficie de ataque más seria encontrada en esta revisión, sin esperar
    a que Isa v2 salga de Sandbox.
-1. **Quick wins (< 1 día):** `crypto.randomUUID()` para `state` y `leadId`
-   (MEDIO-1, MEDIO-4), corregir `base_url` de Decap (MEDIO-3), fijar
-   `redirect_uri` a constante (MEDIO-2), eliminar código muerto en
-   `callback.ts` (BAJO-2), `npm audit fix` (parte de ALTO-3), quitar el
-   scope `gmail.send` no usado (parte de ALTO-5).
-2. **Corto plazo (días):** mover el rate limit de `/api/lead` a un store
-   compartido (ALTO-2), acotar/afinar la CSP y evaluar nonces (ALTO-1),
-   limpiar `localStorage` al completar el flujo (BAJO-1), acotar el scope
-   de Drive a `drive.file` y validar `fileId` contra un registro propio
-   (ALTO-4), evaluar si `espazios-whatsapp-agent` debe seguir siendo
+1. **Quick wins (< 1 día, bajo riesgo):** `crypto.randomUUID()` para
+   `state` y `leadId` (MEDIO-1, MEDIO-4), eliminar código muerto en
+   `callback.ts` (BAJO-2), agregar `rel="noopener"` (BAJO-3), `npm audit
+   fix` sin `--force` (parte de ALTO-3/MEDIO-7), quitar el scope
+   `gmail.send` no usado (parte de ALTO-5), agregar CI mínimo a
+   `espazios-whatsapp-agent` (MEDIO-6).
+2. **Corto plazo (días, verificar el sistema externo primero):** fijar
+   `redirect_uri` y `base_url` a constantes (MEDIO-2 + MEDIO-3) — **después**
+   de confirmar que el dominio de producción está registrado en la GitHub
+   OAuth App; mover el rate limit de `/api/lead` a un store compartido
+   diseñado *fail-open* (ALTO-2); agregar el registro propio de `fileId`
+   válidos en `/tools/cotizaciones/:fileId` sin tocar el scope todavía
+   (parte de ALTO-4); limpiar `localStorage` al completar el flujo
+   (BAJO-1); evaluar si `espazios-whatsapp-agent` debe seguir siendo
    público (MEDIO-5).
-3. **A planificar:** upgrade de Astro para resolver la CVE de `sharp`
-   (ALTO-3), confirmar y documentar (o construir) la integración
-   WhatsApp → CRM (INFO-1), agregar aviso de tratamiento de datos al flujo
-   de WhatsApp v1 mientras siga en producción (INFO-2), migrar de OAuth de
-   cuenta personal a una identidad de servicio dedicada cuando la política
-   de Google Cloud lo permita (ALTO-5).
+3. **A planificar con ventana de pruebas dedicada (mayor riesgo si sale
+   mal):** CSP sin `unsafe-inline`/`unsafe-eval`, probada en preview contra
+   el cotizador completo y `/admin` (ALTO-1); reducir el scope de Google a
+   `drive.file`, re-verificando que la plantilla y la hoja de tarifas
+   sigan accesibles (resto de ALTO-4); migrar de OAuth de cuenta personal a
+   una identidad dedicada, re-compartiendo todos los recursos de Google
+   (resto de ALTO-5); upgrade mayor de Astro para resolver la CVE de
+   `sharp` (`npm audit fix --force`, resto de ALTO-3). Ninguno de estos
+   cuatro debería desplegarse el mismo día que otro cambio, para poder
+   aislar la causa si algo se rompe.
+4. **Sin código, solo proceso/negocio:** confirmar y documentar (o
+   construir) la integración WhatsApp → CRM (INFO-1), agregar aviso de
+   tratamiento de datos al flujo de WhatsApp v1 mientras siga en producción
+   (INFO-2).

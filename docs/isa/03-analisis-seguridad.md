@@ -296,6 +296,51 @@ upgrade mayor de `sharp`/`googleapis` cuando haya ventana de pruebas, dado
 que ambos paquetes están en el camino crítico (renderizado de imágenes y
 todas las llamadas a Google APIs).
 
+### Hallazgo BAJO-4 — Sin límite de regeneraciones por conversación
+
+**Dónde:** `docs/isa-v2-system-prompt.md`, sección 6.1 ("Si el cliente
+corrige un dato ya dado... vuelve a llamar la herramienta correspondiente")
++ `tools-server.ts` (sin ningún límite por conversación o por número de
+WhatsApp).
+
+El guion le indica a Isa que, cada vez que el cliente "corrija" `ciudad`,
+`tipo_proyecto` o `m2` — incluso después de ya haber mostrado el
+estimado — vuelva a llamar `generar_estimado_ilustrativo` o
+`ver_detalle_paquete` y mande la imagen nueva. No hay ningún tope de
+cuántas veces puede pasar esto en una sola conversación. Un usuario real
+de WhatsApp (no necesariamente malicioso, puede ser solo indeciso) que
+escriba "corrijo, son 45m2... no espera, 50... mejor 55" varias veces
+dispara la misma cantidad de lecturas a Google Sheets y renders de imagen
+con `sharp`. No es un vector de intrusión — es un costo/disponibilidad
+menor — pero conviene tenerlo presente porque **no se resuelve solo con
+CRÍTICO-1**: ese fix limita quién puede llamar al servidor, no cuántas
+veces una conversación legítima ya autenticada puede hacerlo.
+
+**Recomendación:** severidad baja, no urgente. Si se vuelve un problema
+real de costo, agregar un contador simple por `whatsapp_conversation_id`
+(vía `get_execution_metadata`/`save_variable` de Kapso, o un caché en
+`tools-server.ts`) con un tope razonable (ej. 5 regeneraciones).
+
+### Hallazgo INFO-5 — Tabla de referencia de TikTok agrega nombre de cliente + edificio
+
+**Dónde:** `docs/isa-v2-system-prompt.md`, sección 11 — tabla de ~130 filas
+con proyecto, nombre del cliente y URL del video.
+
+Los videos en sí son contenido de marketing ya público en el TikTok de
+Espazios, así que no es una filtración nueva de por sí. Lo que sí es
+distinto es tener, en un archivo versionado en un **repo público**, una
+tabla consolidada que empareja explícitamente el primer nombre de ~90
+clientes distintos con el conjunto/torre exacto donde vive cada uno —
+una correlación nombre+edificio más directa y fácil de raspar que
+buscarla video por video en TikTok.
+
+**Recomendación:** sin acción urgente (es igual de público que el video
+de origen), pero si el repo se privatiza por MEDIO-5, esto deja de ser un
+tema. Si se mantiene público, considerar quitar la columna "Cliente" de
+la tabla versionada (Isa no necesita el nombre para elegir el video, solo
+el proyecto/torre) y dejar esa asociación solo donde ya vivía —el propio
+video de TikTok.
+
 ## Aspectos positivos encontrados
 
 - `vercel.json` define HSTS (`preload`), `X-Content-Type-Options: nosniff`,

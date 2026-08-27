@@ -18,6 +18,7 @@ técnicos y el análisis de ciberseguridad / seguridad digital de los tres.
 | [`01-diagramas-funcionales.md`](./01-diagramas-funcionales.md) | Recorrido del usuario paso a paso en cada canal, y el embudo unificado de leads |
 | [`02-arquitectura-tecnica.md`](./02-arquitectura-tecnica.md) | Componentes, integraciones, secuencias técnicas y mapa de datos personales (PII) |
 | [`03-analisis-seguridad.md`](./03-analisis-seguridad.md) | Hallazgos de seguridad, severidad, impacto, recomendaciones y cumplimiento (Ley 1581/2012) |
+| [`04-informe-remediacion.md`](./04-informe-remediacion.md) | Los 24 hallazgos clasificados por riesgo de romper algo ya construido, con la solución de cada uno |
 
 ## Metodología y alcance
 

@@ -29,6 +29,9 @@ const fmtDate = (d: Date) => d.toLocaleDateString('es-CO', { day: 'numeric', mon
           {entry.data.minutosLectura && <span>· {entry.data.minutosLectura} min de lectura</span>}
           <span>· Por {entry.data.autor}</span>
         </div>
+        {entry.data.imagenDestacada && (
+          <img class="post-hero-img" src={entry.data.imagenDestacada} alt={entry.data.title} width="1200" height="675" />
+        )}
       </div>
     </section>
     <section class="post-content">
@@ -54,6 +57,7 @@ const fmtDate = (d: Date) => d.toLocaleDateString('es-CO', { day: 'numeric', mon
   .breadcrumb a { color: var(--c-verde-texto); text-decoration: none; }
   .cat-tag { color: var(--c-verde-texto); font-weight: 600; }
   .meta-row { display: flex; gap: var(--space-2); flex-wrap: wrap; font-size: 0.9rem; color: var(--c-text-muted); }
+  .post-hero-img { width: 100%; max-width: 900px; aspect-ratio: 16/9; object-fit: cover; border-radius: var(--radius-lg); box-shadow: var(--shadow-medium); margin: var(--space-8) auto 0; display: block; }
   .post-content { padding: var(--space-12) 0; }
   .content-wrap { max-width: 760px; margin: 0 auto; }
   .content-wrap :global(h2) { font-size: 1.5rem; margin-top: var(--space-12); margin-bottom: var(--space-4); }

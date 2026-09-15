@@ -21,7 +21,7 @@ const destacados = proyectos
     <div class="proyectos-grid">
       {destacados.map((p) => (
         <a href={`/proyectos/${p.slug}`} class="proyecto-card reveal">
-          <div class="proyecto-card-img"></div>
+          <div class="proyecto-card-img" style={p.data.fotoPortada ? `background-image: url(${p.data.fotoPortada}); background-size: cover; background-position: center;` : undefined}></div>
           <div class="proyecto-card-overlay"></div>
           {p.data.tieneVideo && (
             <div class="video-badge">▶ {p.data.videoPlataforma}</div>

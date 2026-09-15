@@ -39,7 +39,7 @@ const proyectos = (await getCollection('proyectos', ({ data }) => !data.draft))
       <div class="proyectos-grid" id="grid">
         {proyectos.map(p => (
           <a href={`/proyectos/${p.slug}`} class="proyecto-card reveal" data-tipo={p.data.tipoProyecto} data-subtipo={p.data.subtipo} data-ciudad={p.data.ciudad}>
-            <div class="proyecto-card-img"></div>
+            <div class="proyecto-card-img" style={p.data.fotoPortada ? `background-image: url(${p.data.fotoPortada}); background-size: cover; background-position: center;` : undefined}></div>
             <div class="proyecto-card-overlay"></div>
             {p.data.tieneVideo && <div class="video-badge">▶ {p.data.videoPlataforma}</div>}
             <div class="proyecto-card-content">

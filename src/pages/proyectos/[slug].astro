@@ -52,7 +52,7 @@ function getEmbedUrl(url?: string, plataforma?: string): string {
           <span>·</span>
           <span>Entregado {fmtDate(entry.data.fechaEntrega)}</span>
         </div>
-        <div class="hero-image"></div>
+        <div class="hero-image" style={entry.data.fotoPortada ? `background-image: url(${entry.data.fotoPortada}); background-size: cover; background-position: center;` : undefined}></div>
       </div>
     </section>
 
@@ -61,10 +61,19 @@ function getEmbedUrl(url?: string, plataforma?: string): string {
         <div class="container">
           <h2>Mira este proyecto en video</h2>
           <div class:list={['video-wrapper', entry.data.videoPlataforma === 'TikTok' && 'video-wrapper--vertical']}>
-            <iframe src={getEmbedUrl(entry.data.videoUrl, entry.data.videoPlataforma)}
-              frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen loading="lazy"></iframe>
+            <button
+              type="button"
+              class="video-facade"
+              data-embed-src={getEmbedUrl(entry.data.videoUrl, entry.data.videoPlataforma)}
+              aria-label={`Reproducir video de ${entry.data.videoPlataforma}`}
+            >
+              <span class="video-facade-play" aria-hidden="true">▶</span>
+              <span class="video-facade-label">Ver video · {entry.data.videoPlataforma}</span>
+            </button>
           </div>
+          <p class="video-fallback">
+            ¿El video no carga? <a href={entry.data.videoUrl} target="_blank" rel="noopener">Verlo directo en {entry.data.videoPlataforma} →</a>
+          </p>
         </div>
       </section>
     )}
@@ -107,11 +116,32 @@ function getEmbedUrl(url?: string, plataforma?: string): string {
 
   .video-section { padding: var(--space-12) 0; }
   .video-section h2 { font-size: var(--fs-h2); margin-bottom: var(--space-6); text-align: center; }
-  .video-wrapper { max-width: 800px; margin: 0 auto; aspect-ratio: 16/9; border-radius: var(--radius-lg); overflow: hidden; background: #000; }
-  .video-wrapper iframe { width: 100%; height: 100%; border: 0; }
+  .video-wrapper { max-width: 800px; margin: 0 auto; aspect-ratio: 16/9; border-radius: var(--radius-lg); overflow: hidden; background: #000; position: relative; }
+  .video-wrapper iframe { width: 100%; height: 100%; border: 0; display: block; }
   /* TikTok es vertical (9:16), no horizontal — un aspect-ratio 16:9 lo deja
-     aplastado con barras negras enormes a los costados. */
-  .video-wrapper--vertical { max-width: 360px; aspect-ratio: 9/16; }
+     aplastado con barras negras enormes a los costados. min() evita que se vea
+     recortado en pantallas angostas (<392px) donde 360px + padding no cabe. */
+  .video-wrapper--vertical { max-width: min(360px, 100%); aspect-ratio: 9/16; }
+
+  .video-facade {
+    all: unset; cursor: pointer;
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-3);
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, var(--c-azul-pizarra), var(--c-azul-profundo));
+  }
+  .video-facade-play {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: rgba(255,255,255,0.95); color: var(--c-azul-profundo);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; padding-left: 3px;
+    transition: transform var(--t-fast);
+  }
+  .video-facade:hover .video-facade-play,
+  .video-facade:focus-visible .video-facade-play { transform: scale(1.08); }
+  .video-facade-label { color: #fff; font-size: 0.85rem; font-weight: 600; }
+  .video-fallback { text-align: center; font-size: 0.85rem; color: var(--c-text-muted); margin-top: var(--space-4); }
+  .video-fallback a { color: var(--c-verde-texto); }
 
   .proyecto-content { padding: var(--space-12) 0; }
   .content-wrap { max-width: 760px; margin: 0 auto; }
@@ -130,3 +160,18 @@ function getEmbedUrl(url?: string, plataforma?: string): string {
   .cta-final { background: var(--c-azul-profundo); color: #fff; text-align: center; padding: var(--space-16) 0; }
   .cta-final h2 { color: #fff; font-size: var(--fs-h1); margin-bottom: var(--space-6); }
 </style>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('.video-facade').forEach((facade) => {
+    facade.addEventListener('click', () => {
+      const src = facade.dataset.embedSrc;
+      if (!src) return;
+      const iframe = document.createElement('iframe');
+      iframe.src = src;
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      iframe.allowFullscreen = true;
+      iframe.loading = 'eager';
+      facade.replaceWith(iframe);
+    }, { once: true });
+  });
+</script>

@@ -33,7 +33,7 @@ const fmtDate = (d: Date) => d.toLocaleDateString('es-CO', { month: 'long', year
       <div class="blog-grid">
         {posts.map(p => (
           <a href={`/blog/${p.slug}`} class="blog-card reveal" data-cat={p.data.categoria}>
-            <div class="blog-card-img">
+            <div class="blog-card-img" style={p.data.imagenDestacada ? `background-image: url(${p.data.imagenDestacada}); background-size: cover; background-position: center;` : undefined}>
               <span class="blog-card-cat">{p.data.categoria}</span>
             </div>
             <div class="blog-card-body">
